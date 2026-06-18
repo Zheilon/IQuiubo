@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.zhei.diabeat"
+    namespace = "com.zhei.ikiora"
     compileSdk = 35
 
     defaultConfig {
@@ -25,7 +25,7 @@ android {
         // Correcciones bugs o ajustes menores.
         val patch = 0
 
-        applicationId = "com.zhei.diabeat"
+        applicationId = "com.zhei.ikiora"
         minSdk = 27
         targetSdk = 35
         versionCode = mayor * 10000 + minor * 100 + patch // 1.0.0 = 10000
@@ -97,7 +97,39 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.hilt.android)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.runtime.livedata)
+    implementation(libs.androidx.activity.ktx)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.material.icons.extended)
+
+
+    // ---------- Configuración Firebase Auth
+    // Auth (sin versión si usas el BoM)
+    implementation("com.google.firebase:firebase-auth")
+
+    // Para usar .await() en las Tasks de Firebase
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
+
+    // Credential Manager (solo si harás Google Sign-In)
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
+
+    // ---------- Configuración Room
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.runtime)
+
+
+    // ---------- Configuración de hilt
     ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -105,4 +137,7 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Util para configurar el splash screen
+    implementation("androidx.core:core-splashscreen:1.0.1")
 }

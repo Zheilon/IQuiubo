@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Diabeat"
+rootProject.name = "Ikiora"
 include(":app")
  
