@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.zhei.hikibo" />
+                  <option name="mobileSdkAppId" value="1:575733097258:android:6e52c449e84affbad2b453" />
+                  <option name="projectId" value="hikibo-e6ae5" />
+                  <option name="projectNumber" value="575733097258" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

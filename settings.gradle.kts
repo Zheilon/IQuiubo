@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Ikiora"
+rootProject.name = "Hikibo"
 include(":app")
  

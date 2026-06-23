@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.Diabeat" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Hikibo" parent="android:Theme.Material.Light.NoActionBar" />
 
-    <style name="Theme.Diabeat.Splash" parent="Theme.SplashScreen">
+    <style name="Theme.Hikibo.Splash" parent="Theme.SplashScreen">
         <!-- ESTE es el fondo que quieres cambiar -->
         <item name="windowSplashScreenBackground">@color/splash_background</item>
 
         <!-- Tu logo centrado -->
-        <!-- <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_diabeat_round</item> -->
+        <!-- <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_hikibo_round</item> -->
 
         <!-- El tema "normal" al que salta cuando ya cargó la app -->
-        <item name="postSplashScreenTheme">@style/Theme.Diabeat</item>
+        <item name="postSplashScreenTheme">@style/Theme.Hikibo</item>
     </style>
 
 </resources>

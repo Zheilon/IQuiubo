@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.zhei.ikiora"
+    namespace = "com.zhei.hikibo"
     compileSdk = 35
 
     defaultConfig {
@@ -25,7 +25,7 @@ android {
         // Correcciones bugs o ajustes menores.
         val patch = 0
 
-        applicationId = "com.zhei.ikiora"
+        applicationId = "com.zhei.hikibo"
         minSdk = 27
         targetSdk = 35
         versionCode = mayor * 10000 + minor * 100 + patch // 1.0.0 = 10000
@@ -111,8 +111,10 @@ dependencies {
     // Auth (sin versión si usas el BoM)
     implementation("com.google.firebase:firebase-auth")
 
+
     // Para usar .await() en las Tasks de Firebase
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
+
 
     // Credential Manager (solo si harás Google Sign-In)
     implementation("androidx.credentials:credentials:1.3.0")
@@ -129,6 +131,7 @@ dependencies {
     // ---------- Configuración de hilt
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
