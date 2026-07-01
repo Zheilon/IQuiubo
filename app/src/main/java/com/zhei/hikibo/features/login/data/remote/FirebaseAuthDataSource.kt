@@ -47,7 +47,9 @@ class FirebaseAuthDataSource @Inject constructor(
 
 
 
-    suspend fun sendEmailVerification() { auth.currentUser?.sendEmailVerification()?.await() }
+    suspend fun sendEmailVerification() {
+        auth.currentUser?.sendEmailVerification()?.await()
+    }
 
 
 

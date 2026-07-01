@@ -53,6 +53,18 @@ sealed interface EmailUiState {
 }
 
 
+/**
+ * Representan los errores cuando se guardan valores
+ * en firestore o se leen
+ * */
+sealed interface FirestoreUiState {
+    data object Idle: FirestoreUiState
+    data object Loading: FirestoreUiState
+    data object Success: FirestoreUiState
+    data class Error(val message: String): FirestoreUiState
+}
+
+
 suspend fun getGoogleIdToken(context: Context): GoogleSignInResult {
 
     return try {
@@ -85,8 +97,8 @@ suspend fun getGoogleIdToken(context: Context): GoogleSignInResult {
 
 
     } catch (e: GetCredentialException) {
-        Log.e("GoogleSignIn (funct)", "Error obteniendo credential", e)   // error real
-        GoogleSignInResult.Error(e, "¡Error Obteniendo credencial!")
+        Log.e("GoogleSignIn (funct)", "NameError obteniendo credential", e)   // error real
+        GoogleSignInResult.Error(e, "¡NameError Obteniendo credencial!")
     }
 
 }

@@ -17,7 +17,7 @@ object ResponsiveText {
      * */
     @Composable
     fun isSmallDevice(): Boolean =
-        LocalConfiguration.current.screenWidthDp <= 360
+        LocalConfiguration.current.screenWidthDp <= Constants.SMALL_DEVICE_WIDTH_DP
 
 
     /**

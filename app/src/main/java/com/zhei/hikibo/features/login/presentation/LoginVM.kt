@@ -1,5 +1,7 @@
 package com.zhei.hikibo.features.login.presentation
+import android.provider.ContactsContract.CommonDataKinds.Email
 import android.util.Log
+import android.util.Patterns
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -7,15 +9,25 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.google.firebase.firestore.FirebaseFirestoreException
+import com.zhei.hikibo.core.framework.NetworkChecker
+import com.zhei.hikibo.features.login.domain.model.UserLogIn
+import com.zhei.hikibo.features.login.domain.usecase.AddFirebaseUserUseCase
 import com.zhei.hikibo.features.login.domain.usecase.CreateEmailUserUserCase
 import com.zhei.hikibo.features.login.domain.usecase.SignInWithEmailUseCase
 import com.zhei.hikibo.features.login.domain.usecase.SignInWithGoogleUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 
 
@@ -23,7 +35,9 @@ import javax.inject.Inject
 class LoginVM @Inject constructor(
     private val signInWithGoogle: SignInWithGoogleUseCase,
     private val signInWithEmail: SignInWithEmailUseCase,
-    private val createUserWithEmail: CreateEmailUserUserCase
+    private val createUserWithEmail: CreateEmailUserUserCase,
+    private val addUserToFirestore: AddFirebaseUserUseCase,
+    private val network: NetworkChecker
 ) : ViewModel() {
 
     private val _isLoggedWithGoogle = mutableStateOf(false)
@@ -53,6 +67,9 @@ class LoginVM @Inject constructor(
     private val _emailUiState = MutableStateFlow<EmailUiState>(EmailUiState.Idle)
     val emailUiState: StateFlow<EmailUiState> = _emailUiState.asStateFlow()
 
+    private val _firestoreUiState = MutableStateFlow<FirestoreUiState>(FirestoreUiState.Idle)
+    val firestoreUiState: StateFlow<FirestoreUiState> = _firestoreUiState.asStateFlow()
+
     private val _emailText = MutableStateFlow("")
     val emailText: StateFlow<String> = _emailText.asStateFlow()
 
@@ -60,11 +77,21 @@ class LoginVM @Inject constructor(
     val passwordText: StateFlow<String> = _passwordText.asStateFlow()
 
 
+    // Creación de un channel para emitir un evento desde
+    // el viewmodel, el cual este se ejecute más adelante en UI.
+    sealed interface LoginNavEvent { data object ToNext: LoginNavEvent }
+
+    private val _navEvents = Channel<LoginNavEvent>(Channel.BUFFERED)
+    val navEvents = _navEvents.receiveAsFlow()
+
+    private val _userLogin = MutableStateFlow(UserLogIn())
+
+
     fun lazyInitialization() {
-
         startTypingEffect()
-
     }
+
+
 
     /**
      * Cuando oprima el (Check Box) va a cambiar de false a true
@@ -76,6 +103,7 @@ class LoginVM @Inject constructor(
         // la variable es (null), ¡Y se corta la función!.
         if (_acceptPolicy.value == null) {
             _acceptPolicy.value = true
+            _userLogin.update { it.copy(policyAccepted = true) }
             return
         }
 
@@ -83,6 +111,7 @@ class LoginVM @Inject constructor(
         // con lo cual no se va a mostrar marcación interna en el
         // checkbox.
         _acceptPolicy.value = null
+        _userLogin.update { it.copy(policyAccepted = false) }
     }
 
 
@@ -93,6 +122,7 @@ class LoginVM @Inject constructor(
      * */
     fun setTrueInCheckBox() {
         _acceptPolicy.value = true
+        _userLogin.update { it.copy(policyAccepted = true) }
     }
 
 
@@ -155,6 +185,16 @@ class LoginVM @Inject constructor(
 
 
     /**
+     * Actualiza el tipo de estado ubicado dentro
+     * de la variable _firestoreUiState
+     * */
+    fun updateFirestoreUiState(state: FirestoreUiState) {
+        _firestoreUiState.value = state
+    }
+
+
+
+    /**
      * Limpia simultaneamente las variables _emailText, _passwordText.
      * Se ejecutará esta acción cuando se cierre el ModalBottomSheet
      * */
@@ -191,7 +231,7 @@ class LoginVM @Inject constructor(
                 }
 
                 is GoogleSignInResult.Error -> {
-                    Log.e("LOGIN VM", "Error de credencial", result.cause)
+                    Log.e("LOGIN VM", "NameError de credencial", result.cause)
                     updateGoogleUiState(GoogleUiState.Error(result.userMessage))
                 }
 
@@ -213,6 +253,15 @@ class LoginVM @Inject constructor(
                 signInWithGoogle(idToken)
 
             }.onSuccess {
+                _userLogin.update { userLogIn ->
+                    userLogIn.copy(
+                        userId = it.uid,
+                        displayName = "",
+                        email = it.email ?: "",
+                        isEmailVerified = it.emailVerified
+                    )
+                }
+
                 _isLoggedWithGoogle.value = true
                 updateGoogleUiState(GoogleUiState.Success)
 
@@ -249,6 +298,14 @@ class LoginVM @Inject constructor(
                 signInWithEmail(_emailText.value, _passwordText.value)
 
             }.onSuccess {
+                _userLogin.update { userLogIn ->
+                    userLogIn.copy(
+                        userId = it.uid,
+                        displayName = "",
+                        email = it.email ?: "",
+                        isEmailVerified = it.emailVerified
+                    )
+                }
                 _isLoggedWithEmail.value = true
                 updateEmailUiState(EmailUiState.Success)
 
@@ -275,22 +332,50 @@ class LoginVM @Inject constructor(
 
 
     fun onEmailSignUpButton() {
+
         viewModelScope.launch {
-            updateEmailUiState(EmailUiState.Loading)
+
+            // Se realiza una validación previa respecto a la estructura de
+            // dominio del correo electrónico que el user va a usar.
+
+            if (!Patterns.EMAIL_ADDRESS.matcher(_emailText.value).matches()) {
+                updateEmailUiState(EmailUiState.Error("Correo inválido."))
+                return@launch
+            }
 
             // Realizar validaciones de las condiciones
             // mínimas que debe tener una contraseña para
             // que pueda ser usada.
 
+            if (_passwordText.value.length < 7) {
+                updateEmailUiState(
+                    EmailUiState.PasswordError(
+                        "La contraseña debe tener al menos 7 caracteres."
+                    )
+                )
+                return@launch
+            }
+
+            updateEmailUiState(EmailUiState.Loading)
+
             runCatching {
                 createUserWithEmail(_emailText.value, _passwordText.value)
 
             }.onSuccess {
+                _userLogin.update { userLogIn ->
+                    userLogIn.copy(
+                        userId = it.uid,
+                        displayName = "",
+                        email = it.email ?: "",
+                        isEmailVerified = it.emailVerified
+                    )
+                }
                 _isLoggedWithEmail.value = true
                 updateEmailUiState(EmailUiState.Success)
 
             }.onFailure {
                 val msg = when(it) {
+
                     is FirebaseNetworkException ->
                         "Sin conexión. Revisa tu internet e intenta de nuevo."
 
@@ -299,15 +384,65 @@ class LoginVM @Inject constructor(
 
                     is FirebaseAuthInvalidCredentialsException ->
                         "Credenciales inválidas. Vuelve a intentarlo."
-
-                    else ->
-                        "No se pudo iniciar sesión. Intenta más tarde."
+                    else -> "No se pudo iniciar sesión. Intenta más tarde."
                 }
 
                 updateEmailUiState(EmailUiState.Error(msg))
             }
         }
     }
+
+
+
+    fun onNavigateNext() {
+
+        if (!allConditionsAreTrue())
+            return
+
+        viewModelScope.launch {
+
+            if (!network.isOnline()) {
+                updateFirestoreUiState(
+                    FirestoreUiState.Error(
+                        "Necesitas conexión a internet para continuar"
+                    )
+                )
+                return@launch
+            }
+
+            updateFirestoreUiState(FirestoreUiState.Loading)
+
+            runCatching {
+                withTimeout(8_000) {
+                    addUserToFirestore(_userLogin.value)
+                }
+
+            }.onSuccess {
+                updateFirestoreUiState(FirestoreUiState.Success)
+                _navEvents.trySend(LoginNavEvent.ToNext)
+
+            }.onFailure {
+                // Rethrow de cancelación real (no la del timeout) — ver nota al final
+                if (it is CancellationException && it !is TimeoutCancellationException)
+                    throw it
+
+                val msg = when (it) {
+                    is TimeoutCancellationException ->
+                        "No pudimos confirmar tu consentimiento. Revisa tu conexión e intenta de nuevo."
+
+                    is FirebaseFirestoreException -> when (it.code) {
+                        FirebaseFirestoreException.Code.PERMISSION_DENIED -> "No tienes permiso para esta acción."
+                        FirebaseFirestoreException.Code.UNAVAILABLE        -> "Servicio no disponible. Intenta más tarde."
+                        else -> "No se pudo guardar. Intenta más tarde."
+                    }
+
+                    else -> "No se pudo guardar. Intenta más tarde."
+                }
+                updateFirestoreUiState(FirestoreUiState.Error(msg))
+            }
+        }
+    }
+
 
 
     private fun startTypingEffect() {

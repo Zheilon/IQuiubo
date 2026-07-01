@@ -6,4 +6,5 @@ import kotlinx.serialization.Serializable
 
     @Serializable data object LoginScene: Scenes()
 
+    @Serializable data object PersonalInfoScene: Scenes()
 }

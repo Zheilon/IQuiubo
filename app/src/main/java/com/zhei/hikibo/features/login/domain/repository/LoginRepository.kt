@@ -5,4 +5,6 @@ interface LoginRepository {
 
     suspend fun saveUser(user: UserLogIn)
 
+    suspend fun getUser(userId: String): UserLogIn?
+
 }

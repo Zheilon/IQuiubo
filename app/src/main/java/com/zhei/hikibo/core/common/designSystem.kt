@@ -22,7 +22,7 @@ fun LockScreenOrientation(orientation: Int) {
 
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable fun ButtonColorWaveConfig(color: Color, block: @Composable () -> Unit) {
+@Composable fun ButtonRippleColor(color: Color, block: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalRippleConfiguration provides RippleConfiguration(color = color)
     ) { block() }

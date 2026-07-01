@@ -21,7 +21,7 @@ object DatabaseModule {
         Room.databaseBuilder(
             context,
             AppDatabase::class.java,
-            "hikibo.db"
+            "app.db"
         ).build()
 
     // Aquí abajo se ponen los Daos con @Provides nada más.
@@ -29,5 +29,4 @@ object DatabaseModule {
 
     @Provides
     fun provideStateSceneDao(db: AppDatabase): StateSceneDao = db.stateSceneDao()
-
 }

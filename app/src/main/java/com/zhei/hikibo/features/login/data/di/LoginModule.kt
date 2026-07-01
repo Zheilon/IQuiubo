@@ -15,7 +15,7 @@ import javax.inject.Singleton
 abstract class LoginModule {
 
     // Pregunta para diseñar:
-    // ¿Qué implementación debe devolver esta abstracción?.
+    // ¿Qué implementación debe utilizar esta abstracción?.
 
     @Binds
     @Singleton
@@ -25,7 +25,5 @@ abstract class LoginModule {
     @Binds
     @Singleton
     abstract fun bindAuthRepository(impl: AuthRepositoryImpl): AuthRepository
-
-
 
 }

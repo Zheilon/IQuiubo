@@ -52,9 +52,9 @@ import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.AttachEmail
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -68,6 +68,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -79,7 +80,6 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
@@ -102,14 +102,17 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.zhei.hikibo.R
-import com.zhei.hikibo.core.common.ButtonColorWaveConfig
-import com.zhei.hikibo.core.common.DEVICE_BOTTOM_PADDING
+import com.zhei.hikibo.core.common.ButtonRippleColor
+import com.zhei.hikibo.core.common.Constants
 import com.zhei.hikibo.core.common.LockScreenOrientation
 import com.zhei.hikibo.core.common.MyFont
 import com.zhei.hikibo.core.common.ResponsiveLineHeight
 import com.zhei.hikibo.core.common.ResponsiveText
-import com.zhei.hikibo.core.common.WIDTH_DP_DEVICE
+import com.zhei.hikibo.core.common.locals.LocalSpacing
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -117,15 +120,31 @@ import kotlinx.coroutines.launch
 // Names: hoppy
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable fun LoginUI(
-    loginVM: LoginVM = hiltViewModel()
+    loginVM: LoginVM = hiltViewModel(),
+    onNavigate: () -> Unit
 ) {
 
     LaunchedEffect(Unit) {
         loginVM.lazyInitialization()
     }
+
+    // En esta linea de código idiomáticamente se colecciona consciente
+    // del ciclo de vida, para no escuchar eventos mientras la pantalla
+    // está en segundo plano.
+
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(Unit) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            loginVM.navEvents.collect {
+                when (it) { LoginVM.LoginNavEvent.ToNext -> onNavigate() }
+            }
+        }
+    }
     
     LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
     val blurCondition = loginVM.showPolicity.value
+
+    val spacing = LocalSpacing.current
 
     Box(
         modifier = Modifier
@@ -136,7 +155,7 @@ import kotlinx.coroutines.launch
     ) {
 
         Image(
-            painter = painterResource(id = R.drawable.back_login_v10),
+            painter = painterResource(id = R.drawable.back_login_v11),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
@@ -145,20 +164,20 @@ import kotlinx.coroutines.launch
         Column (
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 20.dp, end = 20.dp, bottom = DEVICE_BOTTOM_PADDING()),
+                .padding(start = spacing.lg, end = spacing.lg, bottom = Constants.DEVICE_BOTTOM_PADDING()),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            //ImagenCenter()
+            // ImagenCenter()
 
-            //Spacer(modifier = Modifier.weight(1f))
+            // Spacer(modifier = Modifier.weight(1f))
 
-            //BoxSloganUpper()
+            // BoxSloganUpper()
 
             TextUpperLoginBox()
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
             BoxToJoinWithSomething(loginVM)
 
@@ -166,7 +185,11 @@ import kotlinx.coroutines.launch
 
             PolicyAndPrivArea(loginVM)
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(5.dp))
+
+            FirebaseSendCapError(loginVM)
+
+            Spacer(modifier = Modifier.height(5.dp))
 
             ButtonLastToContinue(loginVM)
 
@@ -231,18 +254,6 @@ import kotlinx.coroutines.launch
 
 @Composable private fun TextUpperLoginBox() {
 
-    Text(
-        text = "Te damos la bienvenida a",
-        fontFamily = MyFont.ebgaramondregular,
-        fontSize = ResponsiveText.body(),
-        lineHeight = ResponsiveLineHeight.body(),
-        textAlign = TextAlign.Center,
-        color = Color(0xFF0C3A47),
-        modifier = Modifier.fillMaxWidth()
-    )
-
-    Spacer(modifier = Modifier.height(10.dp))
-
     // Atención: Este box esta puesto con la intención de que, primero
     // por detras se vea la linea divisoria, y encima de esta la
     // palabra Hikibo.
@@ -265,8 +276,8 @@ import kotlinx.coroutines.launch
             //listOf(Color(0xFF00A6FF), Color(0xFFFF0026), Color(0xFFFFD900))
 
             Text(
-                text = buildAnnotatedString { append("Hikibo") },
-                style = TextStyle(brush = Brush.linearGradient(listOf(Color(0xFF0C3A47), Color(0xFFF0815C), Color(0xFFF4B33D)))),
+                text = buildAnnotatedString { append("IQuiubo") },
+                color = Color(0xFF5500FF),
                 fontFamily = MyFont.jakartaSansRegular,
                 fontSize = ResponsiveText.displayBig(),
                 lineHeight = ResponsiveLineHeight.displayBig(),
@@ -289,6 +300,8 @@ import kotlinx.coroutines.launch
     val emailLogged by loginVM.isLoggedWithEmail
     val logged = googleLogged || emailLogged
 
+    val spacing = LocalSpacing.current
+
     val shape = RoundedCornerShape(20.dp)
 
     // Puse es box para diseñar una posible animación
@@ -304,7 +317,6 @@ import kotlinx.coroutines.launch
                 // Azul Ultramarine good = 0xFF0079C4
                 // Azul muy claro = 0xFFB8EAFF
                 .background(color = Color.White, shape = shape)
-                .padding(15.dp)
         ) {
 
             Column (
@@ -313,27 +325,44 @@ import kotlinx.coroutines.launch
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                TextTitleInMiddle(loginVM)
+                Column (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(spacing.md),
+                    verticalArrangement = Arrangement.spacedBy(spacing.sm),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
 
-                Spacer(modifier = Modifier.height(20.dp))
+                    TextTitleInMiddle(loginVM)
 
-                if (!logged) {
-                    TextToSignInWithSomething()
-                    Spacer(modifier = Modifier.height(10.dp))
+                    if (!logged) {
+                        TextToSignInWithSomething()
+                    }
                 }
 
-                if (!emailLogged) {
-                    ButtonToSignInWithGoogle(loginVM)
-                }
 
-                if (!googleLogged) {
-                    Spacer(modifier = Modifier.height(10.dp))
-                    ButtonToSignInWithEmail(loginVM)
-                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            color = Color(0xFFFBF7F1),
+                            RoundedCornerShape(
+                                topStart = spacing.xl,
+                                topEnd = spacing.xl)
+                            )
+                        .padding(spacing.md),
+                    verticalArrangement = Arrangement.spacedBy(spacing.sm),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
 
-                if (!logged) {
-                    Spacer(modifier = Modifier.height(20.dp))
-                    IfYouDontHaveAccount(loginVM)
+                    if (!emailLogged)
+                        ButtonToSignInWithGoogle(loginVM)
+
+                    if (!googleLogged)
+                        ButtonToSignInWithEmail(loginVM)
+
+                    if (!logged)
+                        IfYouDontHaveAccount(loginVM)
                 }
             }
         }
@@ -369,14 +398,12 @@ import kotlinx.coroutines.launch
         fontWeight = FontWeight.SemiBold,
         textAlign = TextAlign.Center,
         color = Color(0xFF0C3A47),
-        fontFamily = MyFont.geistMonoNerdFontRegular
+        fontFamily = MyFont.geistMonoNerdFontRegular,
     )
 }
 
 
 @Composable private fun TextToSignInWithSomething() {
-
-    val shape = RoundedCornerShape(20.dp)
 
     Text(
         text = "Inicia sesión para comenzar:",
@@ -384,7 +411,7 @@ import kotlinx.coroutines.launch
         lineHeight = ResponsiveLineHeight.body(),
         textAlign = TextAlign.Center,
         color = Color(0xFF0C3A47),
-        fontFamily = MyFont.jakartaSansRegular,
+        fontFamily = MyFont.jakartaSansRegular
     )
 }
 
@@ -395,7 +422,7 @@ import kotlinx.coroutines.launch
 
     val googleUiState by loginVM.googleUiState.collectAsState()
     val logged by loginVM.isLoggedWithGoogle
-    val shape = RoundedCornerShape(15.dp)
+    val shape = RoundedCornerShape(100.dp)
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -412,7 +439,7 @@ import kotlinx.coroutines.launch
 
     GoogleErrorUI(loginVM)
 
-    ButtonColorWaveConfig(
+    ButtonRippleColor(
         color = Color.Black
     ) {
 
@@ -425,7 +452,8 @@ import kotlinx.coroutines.launch
             // enable color: Azul claro = 0xFFA6E4FF
             // enable color: Ultramarine = 0xFF008CE3
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFFBF7F1),
+                // Color anterior: Color(0xFFFBF7F1)
+                containerColor = Color.White,
                 disabledContainerColor = Color(0xFFD5FFD4)
             ),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp),
@@ -494,8 +522,6 @@ import kotlinx.coroutines.launch
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center
             )
-
-            Spacer(modifier = Modifier.height(10.dp))
         }
 
         else -> {}
@@ -510,7 +536,7 @@ import kotlinx.coroutines.launch
     val emailUiState by loginVM.emailUiState.collectAsState()
     val isLogged by loginVM.isLoggedWithEmail
 
-    val shape = RoundedCornerShape(15.dp)
+    val shape = RoundedCornerShape(100.dp)
     var showSheet by remember { mutableStateOf(false) }
 
     val interactionSource = remember { MutableInteractionSource() }
@@ -524,7 +550,7 @@ import kotlinx.coroutines.launch
 
     // EmailErrorUI(loginVM)
 
-    ButtonColorWaveConfig(
+    ButtonRippleColor(
         color = Color.Black
     ) {
 
@@ -535,13 +561,13 @@ import kotlinx.coroutines.launch
             interactionSource = interactionSource,
             contentPadding = PaddingValues(10.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFFFBF7F1),
+                containerColor = Color.White,
                 disabledContainerColor = Color(0xFFD5FFD4)
             ),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
             // ¿Qué lógica tiene este enabled aquí?: Cuando no se ha loggeado
             // el botón funciona normalmente pero cuando se loggea el
             // botón se desactiva.
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
             enabled = !isLogged,
             shape = shape,
             onClick = {
@@ -552,7 +578,7 @@ import kotlinx.coroutines.launch
         ) {
 
             Icon(
-                imageVector = Icons.Outlined.Email,
+                imageVector = Icons.Default.Email,
                 contentDescription = null,
                 modifier = Modifier.size(30.dp),
                 tint = Color(0xFF0088D1)
@@ -625,14 +651,15 @@ import kotlinx.coroutines.launch
     onDismiss: () -> Unit
 ) {
 
+    val isLogged by loginVM.isLoggedWithEmail
     val email by loginVM.emailText.collectAsState()
     val password by loginVM.passwordText.collectAsState()
     val emailUiState by loginVM.emailUiState.collectAsState()
 
     val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    LaunchedEffect(emailUiState) {
-        if (emailUiState is EmailUiState.Success) {
+    LaunchedEffect(isLogged) {
+        if (isLogged) {
             state.hide()
             onDismiss()
         }
@@ -654,6 +681,20 @@ import kotlinx.coroutines.launch
                 .navigationBarsPadding()
                 .padding(start = 20.dp, end = 20.dp)
         ) {
+            Text(
+                text = "Inicio de sesión",
+                fontSize = ResponsiveText.title(),
+                lineHeight = ResponsiveLineHeight.title(),
+                fontFamily = MyFont.jakartaSansRegular,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF0C3A47)
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            HorizontalDivider(color = Color.DarkGray.copy(alpha = 0.5f))
+
+            Spacer(modifier = Modifier.height(10.dp))
 
             LoginBasicTextfeild(
                 value = email,
@@ -680,7 +721,7 @@ import kotlinx.coroutines.launch
             Spacer(modifier = Modifier.height(10.dp))
 
             ButtonForModalArea(
-                buttonText = "Iniciar sesión",
+                buttonText = "Continuar",
                 onEmailAction = { loginVM.onEmailSignInButton() }
             )
 
@@ -705,7 +746,7 @@ import kotlinx.coroutines.launch
         label = "pressed_scale"
     )
 
-    ButtonColorWaveConfig(color = Color.Black) {
+    ButtonRippleColor(color = Color.Black) {
         Button(
             interactionSource = interactionSource,
             modifier = Modifier
@@ -753,8 +794,8 @@ import kotlinx.coroutines.launch
                         color = Color(0xFF007CD9)
                     )
                 ) { append("Registrate aquí") } },
-            fontSize = ResponsiveText.button(),
-            lineHeight = ResponsiveLineHeight.button(),
+            fontSize = ResponsiveText.caption(),
+            lineHeight = ResponsiveLineHeight.caption(),
             fontFamily = MyFont.jakartaSansRegular,
             modifier = Modifier
                 .fillMaxWidth()
@@ -789,14 +830,15 @@ fun ModalBottonForCreateUserWithEmail(
     onDismiss: () -> Unit
 ) {
 
+    val isLogged by loginVM.isLoggedWithEmail
     val emailUiState by loginVM.emailUiState.collectAsState()
     val email by loginVM.emailText.collectAsState()
     val password by loginVM.passwordText.collectAsState()
 
     val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    LaunchedEffect (Unit) {
-        if (emailUiState is EmailUiState.Success) {
+    LaunchedEffect (isLogged) {
+        if (isLogged) {
             state.hide()
             onDismiss()
         }
@@ -819,6 +861,21 @@ fun ModalBottonForCreateUserWithEmail(
                 .padding(start = 20.dp, end = 20.dp)
         ) {
 
+            Text(
+                text = "Registro de cuenta",
+                fontSize = ResponsiveText.title(),
+                lineHeight = ResponsiveLineHeight.title(),
+                fontFamily = MyFont.jakartaSansRegular,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF0C3A47)
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            HorizontalDivider(color = Color.DarkGray.copy(alpha = 0.5f))
+
+            Spacer(modifier = Modifier.height(10.dp))
+
             LoginBasicTextfeild(
                 value = email,
                 onValueChange = { loginVM.updateEmailText(it) },
@@ -838,7 +895,9 @@ fun ModalBottonForCreateUserWithEmail(
                 label = "Contraseña",
                 modifier = Modifier.fillMaxWidth(),
                 imeAction = ImeAction.Done,
-                isPassword = true
+                isPassword = true,
+                isError = emailUiState is EmailUiState.PasswordError,
+                errorMessage = if (emailUiState is EmailUiState.PasswordError) (emailUiState as EmailUiState.PasswordError).message else null
             )
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -858,6 +917,7 @@ fun ModalBottonForCreateUserWithEmail(
     loginVM: LoginVM
 ) {
 
+    val spacing = LocalSpacing.current
     val shape = RoundedCornerShape(20.dp)
 
     Column(
@@ -865,7 +925,7 @@ fun ModalBottonForCreateUserWithEmail(
             // 1. Azul = 0xFFE0E7EC
             .shadow(8.dp, shape)
             .background(color = Color.White, shape)
-            .padding(20.dp)
+            .padding(spacing.md)
     ) {
         // Azul más claro: 00B2FF
         // Azul más oscuro: 003C6B
@@ -882,7 +942,7 @@ fun ModalBottonForCreateUserWithEmail(
                 .clickable { loginVM.setShowPolicity() }
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(spacing.sm))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -903,7 +963,7 @@ fun ModalBottonForCreateUserWithEmail(
                 fontSize = ResponsiveText.caption(),
                 color = Color(0xFF0C3A47),
                 textAlign = TextAlign.Start,
-                modifier = Modifier.width((WIDTH_DP_DEVICE() + 50.dp) / 2)
+                modifier = Modifier.width((Constants.WIDTH_DP_DEVICE() + 50.dp) / 2)
             )
 
             CheckBoxForPolicityAndPriv(loginVM)
@@ -1037,7 +1097,7 @@ private val policySections = listOf(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(color = Color(0xFFFFF5D9).copy(0.9f), shape)
+                    .background(color = Color.White, shape)
                     .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(15.dp),
                 horizontalAlignment = Alignment.Start,
@@ -1070,8 +1130,8 @@ private val policySections = listOf(
                         color = Color.Black,
                         fontSize = ResponsiveText.body(),
                         lineHeight = ResponsiveLineHeight.body(),
-                        fontFamily = MyFont.jakartaSansRegular,
-                        textAlign = TextAlign.Justify
+                        fontFamily = MyFont.spaceGroteskRegular,
+                        textAlign = TextAlign.Start
                     )
                 }
 
@@ -1097,31 +1157,64 @@ private val policySections = listOf(
                 }
             }
 
-            Button(
-                modifier = Modifier
-                    .size(50.dp)
-                    .offset(x = (-20).dp, y = (-20).dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF945B00)
-                ),
-                contentPadding = PaddingValues(0.dp),
-                shape = RoundedCornerShape(30.dp),
-                onClick = {
-                    scope.launch {
-                        lazyState.animateScrollToItem(policySections.size + 1)
+            /**
+             * ¿El user ya llegó al fondo de la lista?
+             *
+             * Le pregunta a layoutInfo "¿qué ves ahora?" y compara: si el ÚLTIMO
+             * ítem visible es el último de toda la lista (index == total - 1),
+             * entonces tocamos fondo.
+             *
+             * El derivedStateOf es el héroe silencioso: el scroll cambia a cada
+             * pixel, pero esto solo avisa cuando la respuesta pasa de false a true.
+             * Un parpadeo, no mil.
+             */
+            val isAtBottom by remember {
+                derivedStateOf { 
+                    val layoutInfo = lazyState.layoutInfo
+                    val visibleItems = layoutInfo.visibleItemsInfo
+
+                    if (visibleItems.isEmpty()) {
+                        false
+
+                    } else {
+
+                        val lastvisible = visibleItems.last()
+                        lastvisible.index == layoutInfo.totalItemsCount - 1
                     }
                 }
-            ) {
+            }
 
-                Image(
-                    imageVector = Icons.Default.ArrowDownward,
-                    contentDescription = null,
-                    colorFilter = ColorFilter.tint(Color.White),
-                    modifier = Modifier.fillMaxSize(0.5f)
-                )
+            // Aquí el botón se mostrará mientras el usuario
+            // no llegue hasta el fondo donde se encuentra el último (item).
+
+            // Lo interpretaria tipo. ¿El usuario ya esta en el
+            // fondo de la pantalla?.
+            if (!isAtBottom) {
+                Button(
+                    modifier = Modifier
+                        .size(50.dp)
+                        .offset(x = (-Constants.WIDTH_DP_DEVICE() / 2) + 20.dp, y = (-40).dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF945B00)
+                    ),
+                    contentPadding = PaddingValues(0.dp),
+                    shape = RoundedCornerShape(30.dp),
+                    onClick = {
+                        scope.launch {
+                            lazyState.animateScrollToItem(policySections.size + 1)
+                        }
+                    }
+                ) {
+
+                    Image(
+                        imageVector = Icons.Default.ArrowDownward,
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(Color.White),
+                        modifier = Modifier.fillMaxSize(0.5f)
+                    )
+                }
             }
         }
-
     }
 }
 
@@ -1156,13 +1249,39 @@ private val policySections = listOf(
 }
 
 
+@Composable private fun FirebaseSendCapError(
+    loginVM: LoginVM
+) {
+
+    val firestoreUiState by loginVM.firestoreUiState.collectAsState()
+
+    when (val state = firestoreUiState) {
+        is FirestoreUiState.Error -> {
+            Text(
+                text = state.message,
+                fontSize = ResponsiveText.caption(),
+                lineHeight = ResponsiveLineHeight.caption(),
+                fontFamily = MyFont.jakartaSansRegular,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+                color = Color(0xFFD64545)
+            )
+        }
+
+        else -> {}
+    }
+}
+
 
 @Composable private fun ButtonLastToContinue(
     loginVM: LoginVM
 ) {
 
+    val spacing = LocalSpacing.current
+
+    val firebaseUiState by loginVM.firestoreUiState.collectAsState()
     val readyToGo = loginVM.allConditionsAreTrue()
-    val shape = RoundedCornerShape(15.dp)
+    val shape = RoundedCornerShape(spacing.xxl)
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -1187,7 +1306,7 @@ private val policySections = listOf(
         } else { offsetX.animateTo(0f, tween(300)) }
     }
 
-    ButtonColorWaveConfig(
+    ButtonRippleColor(
         color = Color(0xFF442203)
     ) {
 
@@ -1197,7 +1316,7 @@ private val policySections = listOf(
                 .blur(if (readyToGo) 0.dp else 1.dp)
                 .scale(scale),
             interactionSource = interactionSource,
-            contentPadding = PaddingValues(10.dp),
+            contentPadding = PaddingValues(spacing.sm),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF0062A3),
                 disabledContainerColor = Color.White.copy(alpha = 0.2f)
@@ -1206,7 +1325,10 @@ private val policySections = listOf(
             // Para cuando todas las condiciones sean cumplidas el
             // botón sea activará, de lo contrario permanecerá disabled.
             enabled = readyToGo,
-            onClick = {}
+            onClick = {
+                loginVM.updateFirestoreUiState(FirestoreUiState.Idle)
+                loginVM.onNavigateNext()
+            }
         ) {
 
             Text(
@@ -1219,17 +1341,26 @@ private val policySections = listOf(
                 fontFamily = MyFont.jakartaSansRegular,
             )
 
-            Spacer(modifier = Modifier.width(5.dp))
+            Spacer(modifier = Modifier.width(10.dp))
 
             if (readyToGo) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(30.dp)
-                        .offset(x = offsetX.value.dp),
-                    tint = Color(0xFFFBF7F1)
-                )
+
+                if (firebaseUiState !is FirestoreUiState.Loading) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(30.dp)
+                            .offset(x = offsetX.value.dp),
+                        tint = Color(0xFFFBF7F1)
+                    )
+
+                } else {
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier.size(25.dp)
+                    )
+                }
             }
         }
     }

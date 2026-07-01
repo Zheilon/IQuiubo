@@ -6,7 +6,9 @@ import com.zhei.hikibo.core.data.local.entity.StateSceneEntity
 
 
 @Database(
-    entities = [StateSceneEntity::class],
+    entities = [
+        StateSceneEntity::class,
+   ],
     version = 1,
     exportSchema = false
 )
@@ -16,5 +18,4 @@ abstract class AppDatabase: RoomDatabase() {
     // ejem: abstract fun glucoseDao(): GlucoseDao
 
     abstract fun stateSceneDao(): StateSceneDao
-
 }
