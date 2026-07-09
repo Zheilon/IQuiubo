@@ -26,7 +26,7 @@ object Constants {
         LocalConfiguration.current.screenWidthDp.dp
     }
 
-    const val SMALL_DEVICE_WIDTH_DP = 360
+    const val SMALL_DEVICE_WIDTH_DP = 350
 
     val LENGHT_CURRENT_MONTH = YearMonth.now().lengthOfMonth()
 

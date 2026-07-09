@@ -1,7 +1,7 @@
 package com.zhei.hikibo.features.login.data.di
-import com.zhei.hikibo.features.login.data.repository.AuthRepositoryImpl
+import com.zhei.hikibo.core.data.repository.AuthRepositoryImpl
 import com.zhei.hikibo.features.login.data.repository.LoginRepositoryImpl
-import com.zhei.hikibo.features.login.domain.repository.AuthRepository
+import com.zhei.hikibo.core.domain.repository.AuthRepository
 import com.zhei.hikibo.features.login.domain.repository.LoginRepository
 import dagger.Binds
 import dagger.Module
@@ -20,10 +20,5 @@ abstract class LoginModule {
     @Binds
     @Singleton
     abstract fun bindLoginRepository(impl: LoginRepositoryImpl): LoginRepository
-
-
-    @Binds
-    @Singleton
-    abstract fun bindAuthRepository(impl: AuthRepositoryImpl): AuthRepository
 
 }

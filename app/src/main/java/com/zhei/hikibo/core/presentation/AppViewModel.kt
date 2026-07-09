@@ -1,7 +1,9 @@
 package com.zhei.hikibo.core.presentation
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zhei.hikibo.features.login.domain.repository.AuthRepository
+import com.zhei.hikibo.core.domain.repository.AuthRepository
+import com.zhei.hikibo.core.domain.usecases.GetCurrentUserUseCase
 import com.zhei.hikibo.features.login.domain.repository.LoginRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,7 +20,7 @@ import javax.inject.Inject
  * */
 @HiltViewModel
 class AppViewModel @Inject constructor(
-    private val repo: AuthRepository,
+    private val getCurrentUser: GetCurrentUserUseCase,
     private val loginRepo: LoginRepository
 ): ViewModel() {
 
@@ -30,11 +32,20 @@ class AppViewModel @Inject constructor(
     }
 
     val startState: StateFlow<StartState> = flow {
-        val current = repo.currentUser
-        if (current == null) { emit(StartState.LoggedOut); return@flow }
+        val current = getCurrentUser()
 
-        val profile = runCatching { loginRepo.getUser(current.uid) }.getOrNull()
+        if (current == null) {
+            emit(StartState.LoggedOut)
+            return@flow
+        }
+
+        val profile = runCatching {
+            loginRepo.getUser(current)
+        }.getOrNull()
+
         val done = profile?.policyAccepted == true
+
+        Log.e("PROFILE APPVIEWM", profile.toString())
         emit(if (done) StartState.Ready else StartState.NeedsGate)
 
     }.catch {
@@ -47,11 +58,11 @@ class AppViewModel @Inject constructor(
     )
 
 
-    val loginFirst: StartState get() = if (repo.currentUser != null) StartState.Ready
+    val loginFirst: StartState get() = if (getCurrentUser() != null) StartState.Ready
         else StartState.LoggedOut
 
 
-    val loginStateFlow: StateFlow<StartState> = repo.observeAuthState()
-        .map { if (it != null) StartState.Ready else StartState.LoggedOut }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StartState.Loading)
+    //   val loginStateFlow: StateFlow<StartState> = repo.observeAuthState()
+    //       .map { if (it != null) StartState.Ready else StartState.LoggedOut }
+    //       .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), StartState.Loading)
 }

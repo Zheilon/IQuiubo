@@ -1,6 +1,6 @@
 package com.zhei.hikibo.features.login.domain.usecase
-import com.zhei.hikibo.features.login.domain.model.AuthUser
-import com.zhei.hikibo.features.login.domain.repository.AuthRepository
+import com.zhei.hikibo.core.domain.model.AuthUser
+import com.zhei.hikibo.core.domain.repository.AuthRepository
 import javax.inject.Inject
 
 class SignInWithEmailUseCase @Inject constructor(

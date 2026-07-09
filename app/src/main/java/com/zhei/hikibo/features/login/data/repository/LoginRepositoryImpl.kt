@@ -1,13 +1,11 @@
 package com.zhei.hikibo.features.login.data.repository
 import android.util.Log
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.SetOptions
-import com.zhei.hikibo.features.login.domain.model.UserLogIn
+import com.zhei.hikibo.core.common.FirestoreCollections
+import com.zhei.hikibo.core.data.model.FirestoreUser
 import com.zhei.hikibo.features.login.domain.repository.LoginRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -17,11 +15,13 @@ class LoginRepositoryImpl @Inject constructor (
 
 
     /**
-     *
+     * ¿Por qué lo tengo sin captura de errores?
+     * Porque quiero exponer el error al usuario, lo
+     * capturo en el ViewModel().
      * */
-    override suspend fun saveUser(user: UserLogIn) {
+    override suspend fun saveUser(user: FirestoreUser) {
         firestore
-            .collection("users")
+            .collection(FirestoreCollections.USER)
             .document(user.userId)
             .set(user, SetOptions.merge())
             .await()
@@ -29,14 +29,25 @@ class LoginRepositoryImpl @Inject constructor (
 
 
 
-    override suspend fun getUser(userId: String): UserLogIn? {
+    override suspend fun getUser(userId: String): FirestoreUser? {
         return try {
-            val snap = firestore.collection("users").document(userId).get().await()
-            if (snap.metadata.hasPendingWrites()) null
-            else snap.toObject(UserLogIn::class.java)
+            val snap = firestore
+                .collection(FirestoreCollections.USER)
+                .document(userId)
+                .get()
+                .await()
 
-        } catch (e: FirebaseFirestoreException) {
-            // Offline sin caché, sin permiso, etc. → no hay perfil utilizable.
+            Log.e(
+                "getUser",
+                "exists=${snap.exists()}" +
+                        " pending=${snap.metadata.hasPendingWrites()}" +
+                        " cache=${snap.metadata.isFromCache}"
+            )
+
+            if (!snap.exists()) null else snap.toObject(FirestoreUser::class.java)
+
+        } catch (e: Exception) {
+            Log.e("getUser", "getUser falló", e)
             null
         }
     }

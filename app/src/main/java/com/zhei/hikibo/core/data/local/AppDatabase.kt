@@ -8,7 +8,7 @@ import com.zhei.hikibo.core.data.local.entity.StateSceneEntity
 @Database(
     entities = [
         StateSceneEntity::class,
-   ],
+    ],
     version = 1,
     exportSchema = false
 )

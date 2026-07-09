@@ -1,18 +1,31 @@
 package com.zhei.hikibo.features.personal_info.presentation
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.FirebaseNetworkException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
+import com.zhei.hikibo.core.data.model.FirestoreUser
+import com.zhei.hikibo.core.domain.usecases.GetCurrentUserUseCase
+import com.zhei.hikibo.core.framework.NetworkChecker
+import com.zhei.hikibo.features.personal_info.domain.usecases.UpdateProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.Period
 import javax.inject.Inject
 
 
 @HiltViewModel
-class PersonalInfoVM @Inject constructor(): ViewModel() {
+class PersonalInfoVM @Inject constructor(
+    private val updateUserProfile: UpdateProfileUseCase,
+    private val getCurrentUid: GetCurrentUserUseCase,
+    private val network: NetworkChecker
+): ViewModel() {
 
     private val _firstName = MutableStateFlow("")
     val firstName: StateFlow<String> = _firstName.asStateFlow()
@@ -29,6 +42,9 @@ class PersonalInfoVM @Inject constructor(): ViewModel() {
     private val _year = MutableStateFlow("")
     val year: StateFlow<String> = _year.asStateFlow()
 
+    private val _selectedSex = MutableStateFlow<String?>(null)
+    val selectedSex: StateFlow<String?> = _selectedSex.asStateFlow()
+
     private val _personalInfoUiState = MutableStateFlow<PersonalInfoUiState>(PersonalInfoUiState.Idle)
     val personalInfoUiState: StateFlow<PersonalInfoUiState> = _personalInfoUiState.asStateFlow()
 
@@ -38,14 +54,14 @@ class PersonalInfoVM @Inject constructor(): ViewModel() {
 
 
     /**
-     * Actualiza la variable _name
+     * Actualiza la variable _name556
      * */
     fun updateFirstName(value: String) {
         _firstName.value = value.trim()
 
         // Esta sentencia la pongo de esta manera para que
         // cuando halla un error visible, el usuario al momento de
-        // escribir ese error se limpie.
+        // escribir, ese error se limpie.
 
         if (_personalInfoUiState.value is PersonalInfoUiState.NameError)
             updatePersonalInfoUiState(PersonalInfoUiState.Idle)
@@ -83,9 +99,6 @@ class PersonalInfoVM @Inject constructor(): ViewModel() {
      * Actualiza la variable _month
      * */
     fun updateMonth(value: String) {
-
-        val listMonths = listOf("Enero", "Feb.", "Mar.", "Abr.", "May.", "Jun.", "Jul.", "Ago.", "Sept.", "Oct.", "Nov.", "Dic.")
-
         if (value.length < 3) {
             _month.value = value
         }
@@ -105,6 +118,15 @@ class PersonalInfoVM @Inject constructor(): ViewModel() {
         }
 
         if (_personalInfoUiState.value is PersonalInfoUiState.DateError)
+            updatePersonalInfoUiState(PersonalInfoUiState.Idle)
+    }
+
+
+
+    fun setSelectedSex(sex: String) {
+        _selectedSex.value = sex
+
+        if (_personalInfoUiState.value is PersonalInfoUiState.SexError)
             updatePersonalInfoUiState(PersonalInfoUiState.Idle)
     }
 
@@ -149,6 +171,9 @@ class PersonalInfoVM @Inject constructor(): ViewModel() {
             return false
         }
 
+        // Area de validación de que la fecha este en condiciones
+        // de ser usable.
+
         val d = _day.value.toIntOrNull()
         val m = _month.value.toIntOrNull()
         val y = _year.value.toIntOrNull()
@@ -186,6 +211,27 @@ class PersonalInfoVM @Inject constructor(): ViewModel() {
             return false
         }
 
+
+        // Validar si el el user ya marcó la casilla de sexo
+        if (_selectedSex.value == null) {
+            updatePersonalInfoUiState(
+                PersonalInfoUiState.SexError(
+                    "Falta que selecciones tu sexo"
+                )
+            )
+            return false
+        }
+
+        // Si no hay internet, no envio formulario de información personal.
+        if (!network.isOnline()) {
+            updatePersonalInfoUiState(
+                PersonalInfoUiState.OnButtonSendError(
+                    "Sin conexión. Revisa tu internet e intenta de nuevo."
+                )
+            )
+            return false
+        }
+
         // Retorna (true) si todas las condiciones son verdaderas
         return true
     }
@@ -197,10 +243,50 @@ class PersonalInfoVM @Inject constructor(): ViewModel() {
         if (!validateAndSetErrors())
             return
 
-        updatePersonalInfoUiState(PersonalInfoUiState.NameSuccess)
-        updatePersonalInfoUiState(PersonalInfoUiState.FirstLastNameSuccess)
-        updatePersonalInfoUiState(PersonalInfoUiState.DateSuccess)
+        viewModelScope.launch {
 
-        _navEvents.trySend(NavEvent.ToNext)
+            // Comienzo de estado de carga.
+            updatePersonalInfoUiState(PersonalInfoUiState.Loading)
+
+            // Hago un casteo directo con .toInt() pues en la función
+            // validateAndSetErrors() ya se descarta que las fechas esten mal.
+
+            val d = _day.value.toInt()
+            val m = _month.value.toInt()
+            val y = _year.value.toInt()
+
+            val user = FirestoreUser(
+                userId = getCurrentUid() ?: "",
+                firstName = _firstName.value,
+                firstLastName = _firstLastName.value,
+                birthDay = LocalDate.of(y, m, d).toString(),
+                sex = _selectedSex.value ?: "Unspecified"
+            )
+
+            runCatching {
+                updateUserProfile(user)
+
+            }.onSuccess {
+                updatePersonalInfoUiState(PersonalInfoUiState.OnButtonSendSuccess)
+                _navEvents.trySend(NavEvent.ToNext)
+
+            }.onFailure {
+                val msg = when(it) {
+                    is FirebaseNetworkException ->
+                        "Sin conexión. Revisa tu internet e intenta de nuevo."
+
+                    is FirebaseAuthUserCollisionException ->
+                        "Ya existe una cuenta con ese correo."
+
+                    is FirebaseAuthInvalidCredentialsException ->
+                        "Credenciales inválidas. Vuelve a intentarlo."
+                    else -> "No se pudo iniciar sesión. Intenta más tarde."
+                }
+
+                updatePersonalInfoUiState(PersonalInfoUiState.OnButtonSendError(msg))
+            }
+        }
+
+
     }
 }

@@ -1,5 +1,6 @@
 package com.zhei.hikibo.features.personal_info.presentation
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
@@ -16,6 +17,7 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,11 +38,14 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -74,6 +79,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.zhei.hikibo.core.common.ButtonRippleColor
 import com.zhei.hikibo.core.common.Constants
 import com.zhei.hikibo.core.common.MyFont
 import com.zhei.hikibo.core.common.ResponsiveLineHeight
@@ -89,6 +95,8 @@ import kotlinx.coroutines.delay
 
     val spacing = LocalSpacing.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
+
+    Log.e("WIDTH DP DEVICE", Constants.WIDTH_DP_DEVICE().toString())
 
     LaunchedEffect(Unit) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -117,12 +125,16 @@ import kotlinx.coroutines.delay
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(horizontal = spacing.xl)
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .imePadding()
         ) {
 
             // ZONA QUE CEDE: ocupa el espacio sobrante y hace scroll si no cabe
+            // Para column utilizar: .verticalScroll(),
+            // Para Row utilizar: .horizontalScroll()
+            // Bueno con ambas se puede
 
             Column(
                 modifier = Modifier
@@ -148,10 +160,16 @@ import kotlinx.coroutines.delay
                 Spacer(modifier = Modifier.height(spacing.xl))
 
                 TextFieldsArea(personalInfoVM)
+
+                Spacer(modifier = Modifier.height(spacing.lg))
+
+                TypeSexArea(personalInfoVM)
+
+                Spacer(modifier = Modifier.height(spacing.xs))
             }
 
             // BOTÓN FIJO: fuera del weight → nunca se comprime
-            Spacer(Modifier.height(spacing.md))
+            Spacer(Modifier.height(spacing.xl))
 
             ButtonForNextScene(personalInfoVM)
 
@@ -162,22 +180,19 @@ import kotlinx.coroutines.delay
 }
 
 
-
 @Composable private fun TitleFirst() {
 
     val spacing = LocalSpacing.current
 
     Text(
-        text = "Información personal",
-        fontSize = ResponsiveText.displayBig(),
-        lineHeight = ResponsiveText.displayBig(),
+        text = "Información\npersonal",
+        fontSize = ResponsiveText.displaymiddle(),
+        lineHeight = ResponsiveText.displaymiddle(),
         textAlign = TextAlign.Center,
         fontFamily = MyFont.workSansRegular,
         color = Color(0xFF7E22CE),
         fontWeight = FontWeight.ExtraBold,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = spacing.md)
+        modifier = Modifier.fillMaxWidth()
     )
 }
 
@@ -192,9 +207,7 @@ import kotlinx.coroutines.delay
         fontFamily = MyFont.workSansRegular,
         fontSize = ResponsiveText.caption(),
         lineHeight = ResponsiveLineHeight.caption(),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = spacing.md),
+        modifier = Modifier.fillMaxWidth(),
         textAlign = TextAlign.Center,
         color = Color(0xFF6E6685)
     )
@@ -219,9 +232,7 @@ import kotlinx.coroutines.delay
     GetUsernameBasicTextfeild(
         value = firstName,
         onValueChange = { personalInfoVM.updateFirstName(it) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = spacing.md),
+        modifier = Modifier.fillMaxWidth(),
         leadingIcon = Icons.Default.DriveFileRenameOutline,
         label = "Ingresa tu primer nombre",
         textFake = "Juanito",
@@ -234,9 +245,7 @@ import kotlinx.coroutines.delay
     GetUsernameBasicTextfeild(
         value = firsLastName,
         onValueChange = { personalInfoVM.updateFirstLastName(it) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = spacing.md),
+        modifier = Modifier.fillMaxWidth(),
         leadingIcon = Icons.Default.DriveFileRenameOutline,
         label = "Ingresa tu primer apellido",
         textFake = "Montelito",
@@ -247,22 +256,9 @@ import kotlinx.coroutines.delay
     Spacer(modifier = Modifier.height(spacing.lg))
 
     BirthDayTextFieldsArea(personalInfoVM)
-
-    //GetUsernameBasicTextfeild(
-    //    value = age,
-    //    onValueChange = { personalInfoVM.updateAge(it) },
-    //    modifier = Modifier
-    //        .fillMaxWidth()
-    //        .padding(horizontal = spacing.md),
-    //    leadingIcon = Icons.Default.DriveFileRenameOutline,
-    //    imeAction = ImeAction.Done,
-    //    keyboardType = KeyboardType.Number,
-    //    label = "Edad",
-    //    textFake = "22",
-    //    isError = uiState is PersonalInfoUiState.AgeError,
-    //    errorMessage = if (uiState is PersonalInfoUiState.AgeError) (uiState as PersonalInfoUiState.AgeError).message else null
-    //)
 }
+
+
 
 @Composable
 fun BirthDayTextFieldsArea(
@@ -276,7 +272,7 @@ fun BirthDayTextFieldsArea(
     val uiState by personalInfoVM.personalInfoUiState.collectAsStateWithLifecycle()
     val spacing = LocalSpacing.current
 
-    val lenby3 = (Constants.WIDTH_DP_DEVICE() - (spacing.md * 2)) / 3
+    val lenby3 = (Constants.WIDTH_DP_DEVICE() - (spacing.xl * 2) ) / 3
 
     Text(
         text = "Ingresa tu fecha de nacimiento",
@@ -284,11 +280,10 @@ fun BirthDayTextFieldsArea(
         lineHeight = ResponsiveText.caption(),
         textAlign = TextAlign.Start,
         fontFamily = MyFont.workSansRegular,
-        color = Color(0xFF7E22CE),
+        color = Color(0xFF211A2E),
         fontWeight = FontWeight.ExtraBold,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = spacing.md)
+        modifier = Modifier.fillMaxWidth()
+
     )
 
     ShowStringDate(personalInfoVM)
@@ -298,9 +293,7 @@ fun BirthDayTextFieldsArea(
     Spacer(modifier = Modifier.height(spacing.md))
 
     Row (
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = spacing.md),
+        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -372,7 +365,7 @@ fun BirthDayTextFieldsArea(
             lineHeight = ResponsiveLineHeight.caption(),
             fontFamily = MyFont.workSansRegular,
             color = Color(0xFF6E6685),
-            modifier = Modifier.fillMaxWidth().padding(horizontal = spacing.md)
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -395,9 +388,7 @@ fun BirthDayTextFieldsArea(
                 textAlign = TextAlign.Start,
                 fontFamily = MyFont.workSansRegular,
                 color = Color(0xFFD64545),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = spacing.md)
+                modifier = Modifier.fillMaxWidth()
             )
         }
 
@@ -467,6 +458,7 @@ fun BirthDayTextFieldsArea(
                 lineHeight = ResponsiveLineHeight.caption(),
                 fontFamily = MyFont.jakartaSansRegular,
                 color = Color(0xFF7E22CE),
+                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
                     .background(color = Color(0xFFFFFFFF), RoundedCornerShape(20.dp))
                     .padding(start = spacing.sm, end = spacing.lg, bottom = spacing.xs)
@@ -516,11 +508,13 @@ fun BirthDayTextFieldsArea(
                             imageVector = it,
                             contentDescription = null,
                             tint = borderColor,
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(spacing.md)
                         )
-                        Spacer(Modifier.width(10.dp))
+                        Spacer(Modifier.width(spacing.sm))
                     }
 
+                    // En esta parte es donde se encuentra el texto.
+                    
                     Box(
                         modifier = Modifier.weight(1f)
                     ) {
@@ -580,31 +574,158 @@ fun BirthDayTextFieldsArea(
 
 
 
-/**
- * Como esta función esta dentro de un Column en la
- * parte principal, entonces no hay necesidad de
- * poner uno para que sirva como contenedor.
- * */
-@Composable private fun ErrorPersonalInfoUiArea(
+@Composable private fun TypeSexArea(
     personalInfoVM: PersonalInfoVM
 ) {
 
     val spacing = LocalSpacing.current
-    val uiState by personalInfoVM.personalInfoUiState.collectAsStateWithLifecycle()
-
-    when (val st = uiState) {
-        is PersonalInfoUiState.NameError -> {
-            Spacer(modifier = Modifier.height(spacing.md))
+    
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Bottom
+    ) {
+        
+        Text(
+            text = "Sexo",
+            fontSize = ResponsiveText.caption(),
+            lineHeight = ResponsiveLineHeight.caption(),
+            fontFamily = MyFont.jakartaSansRegular,
+            color = Color(0xFF7E22CE),
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier
+                .background(color = Color.White, RoundedCornerShape(20.dp))
+                .padding(start = spacing.sm, end = spacing.lg, bottom = spacing.xs)
+        )
+        
+        Spacer(modifier = Modifier.width(spacing.lg))
+        
+        Row(
+            modifier = Modifier.weight(1f), 
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.Start
+        ) {
 
             Text(
-                text = st.message,
+                text = "F",
+                fontSize = ResponsiveText.body(),
+                lineHeight = ResponsiveLineHeight.body(),
                 fontFamily = MyFont.workSansRegular,
-                fontSize = ResponsiveText.caption(),
-                lineHeight = ResponsiveLineHeight.caption(),
-                textAlign = TextAlign.Center,
-                color = Color(0xFFD64545),
-                modifier = Modifier.fillMaxWidth()
+                fontWeight = FontWeight.ExtraBold,
             )
+            
+            Spacer(modifier = Modifier.width(spacing.md))
+            
+            SelectBoxSexArea(personalInfoVM, "F")
+            
+            Spacer(modifier = Modifier.width(spacing.xxl))
+
+            Text(
+                text = "M",
+                fontSize = ResponsiveText.body(),
+                lineHeight = ResponsiveLineHeight.body(),
+                fontFamily = MyFont.workSansRegular,
+                fontWeight = FontWeight.ExtraBold,
+            )
+
+            Spacer(modifier = Modifier.width(spacing.md))
+
+            SelectBoxSexArea(personalInfoVM, "M")
+        }
+    }
+
+    ErrorSexArea(personalInfoVM)
+}
+
+
+
+@Composable
+private fun SelectBoxSexArea(
+    personalInfoVM: PersonalInfoVM,
+    key: String
+) {
+
+    val selectedSex by personalInfoVM.selectedSex.collectAsStateWithLifecycle()
+    val spacing = LocalSpacing.current
+
+    val defaultColor = if (key == "F") Color(0xFFFFD6FF) else Color(0xFFD6F0FF)
+    val selectedColor = if (key == "F") Color(0xFFFF5959) else Color(0xFF59A4FF)
+
+    val isSelected = key == selectedSex
+
+    // Animación suave del color
+    val boxColor by animateColorAsState(
+        targetValue = if (isSelected) selectedColor else defaultColor,
+        label = "sex_box_color"
+    )
+
+    val icon = if (isSelected) Icons.Default.Check else null
+
+    Button(
+        colors = ButtonDefaults.buttonColors(containerColor = boxColor),
+        shape = CircleShape,
+        contentPadding = PaddingValues(0.dp),
+        modifier = Modifier.size(spacing.xl),
+        onClick = { personalInfoVM.setSelectedSex(key) }
+    ) {
+
+        icon?.let {
+            Icon(
+                imageVector = it,
+                contentDescription = "check_box",
+                modifier = Modifier.size(spacing.lg),
+                tint = Color.White
+            )
+        }
+    }
+}
+
+
+
+@Composable private fun ErrorSexArea(
+    personalInfoVM: PersonalInfoVM
+) {
+
+    val uiState by personalInfoVM.personalInfoUiState.collectAsStateWithLifecycle()
+    val spacing = LocalSpacing.current
+
+    when (val s = uiState) {
+        is PersonalInfoUiState.SexError -> {
+            Text(
+                text = s.message,
+                color = Color(0xFFD64545),
+                fontSize = ResponsiveText.body(),
+                lineHeight = ResponsiveLineHeight.body(),
+                fontFamily = MyFont.spaceGroteskRegular,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Start
+            )
+        }
+        else -> {}
+    }
+}
+
+
+
+@Composable private fun OnButtonErrorShow(
+    personalInfoVM: PersonalInfoVM
+) {
+
+    val uiState by personalInfoVM.personalInfoUiState.collectAsStateWithLifecycle()
+    val spacing = LocalSpacing.current
+
+    when(val s = uiState) {
+        is PersonalInfoUiState.OnButtonSendError -> {
+            Text(
+                text = s.message,
+                color = Color(0xFFD64545),
+                fontSize = ResponsiveText.body(),
+                lineHeight = ResponsiveLineHeight.body(),
+                fontFamily = MyFont.spaceGroteskRegular,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(spacing.md))
         }
 
         else -> {}
@@ -617,6 +738,7 @@ fun BirthDayTextFieldsArea(
     personalInfoVM: PersonalInfoVM
 ) {
 
+    val uiState by personalInfoVM.personalInfoUiState.collectAsStateWithLifecycle()
     val spacing = LocalSpacing.current
     val shape = RoundedCornerShape(spacing.xxl)
 
@@ -629,34 +751,52 @@ fun BirthDayTextFieldsArea(
         label = "button_scaling"
     )
 
+
+    // Este error lo puedo poner porque, el cuerpo
+    // general del composable esta embevido dentro de un
+    // Column().
+
+    OnButtonErrorShow(personalInfoVM)
+
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = spacing.md)
+        modifier = Modifier.fillMaxWidth()
     ) {
 
-        Button(
-            interactionSource = interactionSource,
-            modifier = Modifier
-                .fillMaxWidth()
-                .scale(scale),
-            elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF7E22CE),
-            ),
-            shape = shape,
-            onClick = {
-                personalInfoVM.readyToNav()
-            }
-        ) {
+        ButtonRippleColor(color = Color.Black) {
 
-            Text(
-                text = "¡Adelante!",
-                fontFamily = MyFont.workSansRegular,
-                color = Color(0xFFF8F5FF),
-                fontSize = ResponsiveText.title(),
-                fontWeight = FontWeight.Bold
-            )
+            Button(
+                interactionSource = interactionSource,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .scale(scale),
+                elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF7E22CE),
+                ),
+                shape = shape,
+                onClick = {
+                    personalInfoVM.readyToNav()
+                }
+            ) {
+
+                Text(
+                    text = "¡Adelante!",
+                    fontFamily = MyFont.workSansRegular,
+                    color = Color(0xFFF8F5FF),
+                    fontSize = ResponsiveText.title(),
+                    fontWeight = FontWeight.Bold
+                )
+
+                if (uiState is PersonalInfoUiState.Loading) {
+                    Spacer(modifier = Modifier.width(spacing.lg))
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        modifier = Modifier.size(25.dp)
+                    )
+                }
+            }
         }
+
+
     }
 }

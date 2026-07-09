@@ -1,5 +1,4 @@
 package com.zhei.hikibo.features.login.presentation
-import android.provider.ContactsContract.CommonDataKinds.Email
 import android.util.Log
 import android.util.Patterns
 import androidx.compose.runtime.State
@@ -11,7 +10,7 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.zhei.hikibo.core.framework.NetworkChecker
-import com.zhei.hikibo.features.login.domain.model.UserLogIn
+import com.zhei.hikibo.core.data.model.FirestoreUser
 import com.zhei.hikibo.features.login.domain.usecase.AddFirebaseUserUseCase
 import com.zhei.hikibo.features.login.domain.usecase.CreateEmailUserUserCase
 import com.zhei.hikibo.features.login.domain.usecase.SignInWithEmailUseCase
@@ -84,7 +83,7 @@ class LoginVM @Inject constructor(
     private val _navEvents = Channel<LoginNavEvent>(Channel.BUFFERED)
     val navEvents = _navEvents.receiveAsFlow()
 
-    private val _userLogin = MutableStateFlow(UserLogIn())
+    private val _userLogin = MutableStateFlow(FirestoreUser())
 
 
     fun lazyInitialization() {
@@ -258,7 +257,7 @@ class LoginVM @Inject constructor(
                         userId = it.uid,
                         displayName = "",
                         email = it.email ?: "",
-                        isEmailVerified = it.emailVerified
+                        emailVerified = it.emailVerified
                     )
                 }
 
@@ -303,7 +302,7 @@ class LoginVM @Inject constructor(
                         userId = it.uid,
                         displayName = "",
                         email = it.email ?: "",
-                        isEmailVerified = it.emailVerified
+                        emailVerified = it.emailVerified
                     )
                 }
                 _isLoggedWithEmail.value = true
@@ -333,29 +332,32 @@ class LoginVM @Inject constructor(
 
     fun onEmailSignUpButton() {
 
-        viewModelScope.launch {
+        // Se realiza una validación previa respecto a la estructura de
+        // dominio del correo electrónico que el user va a usar.
 
-            // Se realiza una validación previa respecto a la estructura de
-            // dominio del correo electrónico que el user va a usar.
-
-            if (!Patterns.EMAIL_ADDRESS.matcher(_emailText.value).matches()) {
-                updateEmailUiState(EmailUiState.Error("Correo inválido."))
-                return@launch
-            }
-
-            // Realizar validaciones de las condiciones
-            // mínimas que debe tener una contraseña para
-            // que pueda ser usada.
-
-            if (_passwordText.value.length < 7) {
-                updateEmailUiState(
-                    EmailUiState.PasswordError(
-                        "La contraseña debe tener al menos 7 caracteres."
-                    )
+        if (!Patterns.EMAIL_ADDRESS.matcher(_emailText.value).matches()) {
+            updateEmailUiState(
+                EmailUiState.Error(
+                    "Correo inválido."
                 )
-                return@launch
-            }
+            )
+            return
+        }
 
+        // Realizar validaciones de las condiciones
+        // mínimas que debe tener una contraseña para
+        // que pueda ser usada.
+
+        if (_passwordText.value.length < 7) {
+            updateEmailUiState(
+                EmailUiState.PasswordError(
+                    "La contraseña debe tener al menos 7 caracteres."
+                )
+            )
+            return
+        }
+
+        viewModelScope.launch {
             updateEmailUiState(EmailUiState.Loading)
 
             runCatching {
@@ -367,7 +369,7 @@ class LoginVM @Inject constructor(
                         userId = it.uid,
                         displayName = "",
                         email = it.email ?: "",
-                        isEmailVerified = it.emailVerified
+                        emailVerified = it.emailVerified
                     )
                 }
                 _isLoggedWithEmail.value = true
@@ -399,17 +401,16 @@ class LoginVM @Inject constructor(
         if (!allConditionsAreTrue())
             return
 
-        viewModelScope.launch {
-
-            if (!network.isOnline()) {
-                updateFirestoreUiState(
-                    FirestoreUiState.Error(
-                        "Necesitas conexión a internet para continuar"
-                    )
+        if (!network.isOnline()) {
+            updateFirestoreUiState(
+                FirestoreUiState.Error(
+                    "Sin conexión. Revisa tu internet e intenta de nuevo."
                 )
-                return@launch
-            }
+            )
+            return
+        }
 
+        viewModelScope.launch {
             updateFirestoreUiState(FirestoreUiState.Loading)
 
             runCatching {

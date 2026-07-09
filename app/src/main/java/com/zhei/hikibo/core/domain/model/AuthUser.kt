@@ -1,4 +1,4 @@
-package com.zhei.hikibo.features.login.domain.model
+package com.zhei.hikibo.core.domain.model
 
 data class AuthUser(
     val uid: String,

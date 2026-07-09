@@ -1,6 +1,7 @@
 package com.zhei.hikibo.features.login.presentation
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -151,20 +152,21 @@ import kotlinx.coroutines.launch
             .fillMaxSize()
             .blur(if (blurCondition) 12.dp else 0.dp)
             // Azul turqueza back = 0xFF0062A3
-            .background(Color(0xFFFBF7F1))
+            .background(Color(0xFFF8F5FF))
     ) {
 
-        Image(
-            painter = painterResource(id = R.drawable.back_login_v11),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
+        // Image(
+        //     painter = painterResource(id = R.drawable.back_login_v11),
+        //     contentDescription = null,
+        //     contentScale = ContentScale.Crop,
+        //     modifier = Modifier.fillMaxSize()
+        // )
 
         Column (
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = spacing.lg, end = spacing.lg, bottom = Constants.DEVICE_BOTTOM_PADDING()),
+                .padding(horizontal = spacing.lg)
+                .padding(bottom = Constants.DEVICE_BOTTOM_PADDING()),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -284,7 +286,7 @@ import kotlinx.coroutines.launch
                 fontWeight = FontWeight.ExtraBold,
                 modifier = Modifier
                     .shadow(5.dp, shapePill)
-                    .background(color = Color(0xFFFBF7F1), shapePill)
+                    .background(color = Color.White, shapePill)
                     .padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp)
             )
         }
@@ -301,69 +303,61 @@ import kotlinx.coroutines.launch
     val logged = googleLogged || emailLogged
 
     val spacing = LocalSpacing.current
-
     val shape = RoundedCornerShape(20.dp)
 
-    // Puse es box para diseñar una posible animación
-    // de all inner cotent.
+
     Box(
         modifier = Modifier
-            .fillMaxWidth()
+            .shadow(8.dp, shape = shape)
+            // Azul Ultramarine good = 0xFF0079C4
+            // Azul muy claro = 0xFFB8EAFF
+            .background(color = Color.White, shape = shape)
     ) {
 
-        Box(
-            modifier = Modifier
-                .shadow(8.dp, shape = shape)
-                // Azul Ultramarine good = 0xFF0079C4
-                // Azul muy claro = 0xFFB8EAFF
-                .background(color = Color.White, shape = shape)
+        Column (
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             Column (
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.Top,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(spacing.md),
+                verticalArrangement = Arrangement.spacedBy(spacing.sm),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                Column (
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(spacing.md),
-                    verticalArrangement = Arrangement.spacedBy(spacing.sm),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+                TextTitleInMiddle(loginVM)
 
-                    TextTitleInMiddle(loginVM)
-
-                    if (!logged) {
-                        TextToSignInWithSomething()
-                    }
+                if (!logged) {
+                    TextToSignInWithSomething()
                 }
+            }
 
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = Color(0xFFFBF7F1),
-                            RoundedCornerShape(
-                                topStart = spacing.xl,
-                                topEnd = spacing.xl)
-                            )
-                        .padding(spacing.md),
-                    verticalArrangement = Arrangement.spacedBy(spacing.sm),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = Color(0xFFFFE98A),
+                        RoundedCornerShape(
+                            topStart = spacing.xl,
+                            topEnd = spacing.xl)
+                        )
+                    .padding(spacing.md),
+                verticalArrangement = Arrangement.spacedBy(spacing.sm),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
-                    if (!emailLogged)
-                        ButtonToSignInWithGoogle(loginVM)
+                if (!emailLogged)
+                    ButtonToSignInWithGoogle(loginVM)
 
-                    if (!googleLogged)
-                        ButtonToSignInWithEmail(loginVM)
+                if (!googleLogged)
+                    ButtonToSignInWithEmail(loginVM)
 
-                    if (!logged)
-                        IfYouDontHaveAccount(loginVM)
-                }
+                if (!logged)
+                    IfYouDontHaveAccount(loginVM)
             }
         }
     }
@@ -420,6 +414,8 @@ import kotlinx.coroutines.launch
     loginVM: LoginVM
 ) {
 
+    val spacing = LocalSpacing.current
+
     val googleUiState by loginVM.googleUiState.collectAsState()
     val logged by loginVM.isLoggedWithGoogle
     val shape = RoundedCornerShape(100.dp)
@@ -448,7 +444,7 @@ import kotlinx.coroutines.launch
                 .fillMaxWidth()
                 .scale(scale),
             interactionSource = interactionSource,
-            contentPadding = PaddingValues(10.dp),
+            contentPadding = PaddingValues(spacing.sm),
             // enable color: Azul claro = 0xFFA6E4FF
             // enable color: Ultramarine = 0xFF008CE3
             colors = ButtonDefaults.buttonColors(
@@ -479,7 +475,7 @@ import kotlinx.coroutines.launch
                 modifier = Modifier.size(30.dp)
             )
 
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(spacing.sm))
 
             // Si esta en estado Loading aparecerá un circular
             // progressor, cuando ya no esté cargando se mostrará
@@ -533,6 +529,8 @@ import kotlinx.coroutines.launch
     loginVM: LoginVM
 ) {
 
+    val spacing = LocalSpacing.current
+
     val emailUiState by loginVM.emailUiState.collectAsState()
     val isLogged by loginVM.isLoggedWithEmail
 
@@ -559,7 +557,7 @@ import kotlinx.coroutines.launch
                 .fillMaxWidth()
                 .scale(scale),
             interactionSource = interactionSource,
-            contentPadding = PaddingValues(10.dp),
+            contentPadding = PaddingValues(spacing.sm),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.White,
                 disabledContainerColor = Color(0xFFD5FFD4)
@@ -584,7 +582,7 @@ import kotlinx.coroutines.launch
                 tint = Color(0xFF0088D1)
             )
 
-            Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(spacing.sm))
 
             // Si esta en estado Loading aparecerá un circular
             // progressor, cuando ya no esté cargando se mostrará
@@ -1318,7 +1316,7 @@ private val policySections = listOf(
             interactionSource = interactionSource,
             contentPadding = PaddingValues(spacing.sm),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF0062A3),
+                containerColor = Color(0xFF7E22CE),
                 disabledContainerColor = Color.White.copy(alpha = 0.2f)
             ),
             shape = shape,
@@ -1335,8 +1333,7 @@ private val policySections = listOf(
                 text = "¡Empieza tu camino!",
                 fontSize = ResponsiveText.title(),
                 lineHeight = ResponsiveLineHeight.title(),
-                // Gris great = Color(0xFF8F4900)
-                color = if (readyToGo) Color(0xFFFBF7F1) else Color.Gray,
+                color = Color(0xFFF8F5FF),
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = MyFont.jakartaSansRegular,
             )

@@ -1,5 +1,5 @@
-package com.zhei.hikibo.features.login.domain.repository
-import com.zhei.hikibo.features.login.domain.model.AuthUser
+package com.zhei.hikibo.core.domain.repository
+import com.zhei.hikibo.core.domain.model.AuthUser
 import kotlinx.coroutines.flow.Flow
 
 

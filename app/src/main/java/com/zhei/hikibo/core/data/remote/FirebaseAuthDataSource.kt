@@ -1,15 +1,11 @@
-package com.zhei.hikibo.features.login.data.remote
-import android.accounts.AuthenticatorException
+package com.zhei.hikibo.core.data.remote
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
-import com.zhei.hikibo.features.login.domain.model.AuthUser
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 

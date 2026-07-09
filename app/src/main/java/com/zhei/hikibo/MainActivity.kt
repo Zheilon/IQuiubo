@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.zhei.hikibo.core.common.Constants
 import com.zhei.hikibo.core.navigation.MyNavGraph
 import com.zhei.hikibo.core.navigation.Scenes
 import com.zhei.hikibo.core.presentation.AppViewModel
@@ -30,7 +31,7 @@ class MainActivity : ComponentActivity() {
             val startState by authLogin.startState.collectAsStateWithLifecycle()
             val userFirst = authLogin.loginFirst
 
-            Log.e("(MainActivity)", userFirst.toString())
+            Log.e("(MainActivity)", startState.toString())
 
             HikiboTheme {
                 when (startState) {

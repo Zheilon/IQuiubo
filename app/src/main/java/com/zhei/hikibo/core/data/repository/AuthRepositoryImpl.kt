@@ -1,8 +1,8 @@
-package com.zhei.hikibo.features.login.data.repository
+package com.zhei.hikibo.core.data.repository
 import com.zhei.hikibo.core.mappers.toDomain
-import com.zhei.hikibo.features.login.data.remote.FirebaseAuthDataSource
-import com.zhei.hikibo.features.login.domain.model.AuthUser
-import com.zhei.hikibo.features.login.domain.repository.AuthRepository
+import com.zhei.hikibo.core.data.remote.FirebaseAuthDataSource
+import com.zhei.hikibo.core.domain.model.AuthUser
+import com.zhei.hikibo.core.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
