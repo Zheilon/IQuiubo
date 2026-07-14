@@ -1,12 +1,27 @@
 package com.zhei.hikibo.core.common
+import android.app.Activity
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.RippleConfiguration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource.Companion.SideEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
 
 
 @Composable
@@ -26,4 +41,60 @@ fun LockScreenOrientation(orientation: Int) {
     CompositionLocalProvider(
         LocalRippleConfiguration provides RippleConfiguration(color = color)
     ) { block() }
+}
+
+
+
+@Composable
+fun PaintMyStatusBar(color: Color, darkIcons: Boolean) {
+    val window = (LocalView.current.context as? Activity)?.window ?: return
+    SideEffect {
+        window.statusBarColor = color.toArgb()
+        WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = darkIcons
+    }
+}
+
+
+
+
+fun Modifier.dashedBorder(
+    width: Dp,
+    color: Color,
+    cornerRadius: Dp = 12.dp
+) = drawBehind {
+
+    val stroke = Stroke(
+        width = width.toPx(),
+        pathEffect = PathEffect.dashPathEffect(
+            floatArrayOf(12f, 8f), // línea, espacio
+            0f
+        )
+    )
+
+    drawRoundRect(
+        color = color,
+        style = stroke,
+        cornerRadius = CornerRadius(
+            cornerRadius.toPx(),
+            cornerRadius.toPx()
+        )
+    )
+}
+
+
+
+fun Modifier.bottomLine(
+    width: Dp,
+    color: Color
+) = drawBehind {
+
+    val strokeWidth = width.toPx()
+    val y = size.height - strokeWidth
+
+    drawLine(
+        color = color,
+        start = Offset(0f, y),
+        end = Offset(size.width, y),
+        strokeWidth = strokeWidth
+    )
 }

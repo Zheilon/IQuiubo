@@ -1,5 +1,5 @@
 package com.zhei.hikibo.core.data.repository
-import com.zhei.hikibo.core.mappers.toDomain
+import com.zhei.hikibo.core.mappers.toDomainAuthUser
 import com.zhei.hikibo.core.data.remote.FirebaseAuthDataSource
 import com.zhei.hikibo.core.domain.model.AuthUser
 import com.zhei.hikibo.core.domain.repository.AuthRepository
@@ -14,27 +14,27 @@ class AuthRepositoryImpl @Inject constructor(
 
 
     override val currentUser get(): AuthUser? =
-        dataSource.currentUser?.toDomain()
+        dataSource.currentUser?.toDomainAuthUser()
 
 
 
     override fun observeAuthState(): Flow<AuthUser?> =
-        dataSource.authState().map { it?.toDomain() }
+        dataSource.authState().map { it?.toDomainAuthUser() }
 
 
 
     override suspend fun signInWithEmail(email: String, password: String): AuthUser =
-        dataSource.signIn(email, password).toDomain()
+        dataSource.signIn(email, password).toDomainAuthUser()
 
 
 
     override suspend fun signUpWithEmail(email: String, password: String): AuthUser =
-        dataSource.signUp(email, password).toDomain()
+        dataSource.signUp(email, password).toDomainAuthUser()
 
 
 
     override suspend fun signInWithGoogle(idToken: String): AuthUser =
-        dataSource.signInWithGoogle(idToken).toDomain()
+        dataSource.signInWithGoogle(idToken).toDomainAuthUser()
 
 
 

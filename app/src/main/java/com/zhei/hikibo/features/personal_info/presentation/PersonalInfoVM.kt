@@ -4,8 +4,8 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
-import com.zhei.hikibo.core.data.model.FirestoreUser
-import com.zhei.hikibo.core.domain.usecases.GetCurrentUserUseCase
+import com.zhei.hikibo.core.domain.model.ProfileUpdate
+import com.zhei.hikibo.core.domain.usecases.GetCurrentUserUIDUseCase
 import com.zhei.hikibo.core.framework.NetworkChecker
 import com.zhei.hikibo.features.personal_info.domain.usecases.UpdateProfileUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PersonalInfoVM @Inject constructor(
     private val updateUserProfile: UpdateProfileUseCase,
-    private val getCurrentUid: GetCurrentUserUseCase,
+    private val getCurrentUid: GetCurrentUserUIDUseCase,
     private val network: NetworkChecker
 ): ViewModel() {
 
@@ -255,8 +255,9 @@ class PersonalInfoVM @Inject constructor(
             val m = _month.value.toInt()
             val y = _year.value.toInt()
 
-            val user = FirestoreUser(
-                userId = getCurrentUid() ?: "",
+            val userId = getCurrentUid() ?: ""
+
+            val profileUpdated = ProfileUpdate(
                 firstName = _firstName.value,
                 firstLastName = _firstLastName.value,
                 birthDay = LocalDate.of(y, m, d).toString(),
@@ -264,7 +265,7 @@ class PersonalInfoVM @Inject constructor(
             )
 
             runCatching {
-                updateUserProfile(user)
+                updateUserProfile(userId, profileUpdated)
 
             }.onSuccess {
                 updatePersonalInfoUiState(PersonalInfoUiState.OnButtonSendSuccess)

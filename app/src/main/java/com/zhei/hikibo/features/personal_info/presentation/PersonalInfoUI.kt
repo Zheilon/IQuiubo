@@ -1,5 +1,4 @@
 package com.zhei.hikibo.features.personal_info.presentation
-import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -39,7 +38,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -85,6 +83,7 @@ import com.zhei.hikibo.core.common.MyFont
 import com.zhei.hikibo.core.common.ResponsiveLineHeight
 import com.zhei.hikibo.core.common.ResponsiveText
 import com.zhei.hikibo.core.common.locals.LocalSpacing
+import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
 import kotlinx.coroutines.delay
 
 
@@ -112,7 +111,7 @@ import kotlinx.coroutines.delay
         modifier = Modifier
             .fillMaxSize()
             // Amarillo fondo anterior: Color(0xFFFFD93D)
-            .background(color = Color(0xFFF8F5FF))
+            .background(IQuiuboColorPallete.backgroundLight)
     ) {
 
         //Image(
@@ -771,7 +770,7 @@ private fun SelectBoxSexArea(
                     .scale(scale),
                 elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 8.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF7E22CE),
+                    containerColor = IQuiuboColorPallete.buttonEnabledOne
                 ),
                 shape = shape,
                 onClick = {
@@ -782,7 +781,7 @@ private fun SelectBoxSexArea(
                 Text(
                     text = "¡Adelante!",
                     fontFamily = MyFont.workSansRegular,
-                    color = Color(0xFFF8F5FF),
+                    color = IQuiuboColorPallete.textButtonOne,
                     fontSize = ResponsiveText.title(),
                     fontWeight = FontWeight.Bold
                 )

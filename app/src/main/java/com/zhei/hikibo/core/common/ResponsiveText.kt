@@ -76,6 +76,10 @@ object ResponsiveText {
         if (isSmallDevice()) 10.sp else 12.sp
 
 
+    @Composable fun small(): TextUnit =
+        if (isSmallDevice()) 7.sp else 9.sp
+
+
     /**
      * Tamaño utilizado para textos cuyo tamaño es muy pequeño
      * */

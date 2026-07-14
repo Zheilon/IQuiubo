@@ -11,6 +11,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.zhei.hikibo.core.framework.NetworkChecker
 import com.zhei.hikibo.core.data.model.FirestoreUser
+import com.zhei.hikibo.core.domain.model.User
 import com.zhei.hikibo.features.login.domain.usecase.AddFirebaseUserUseCase
 import com.zhei.hikibo.features.login.domain.usecase.CreateEmailUserUserCase
 import com.zhei.hikibo.features.login.domain.usecase.SignInWithEmailUseCase
@@ -27,6 +28,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import java.time.Instant
 import javax.inject.Inject
 
 
@@ -83,7 +85,7 @@ class LoginVM @Inject constructor(
     private val _navEvents = Channel<LoginNavEvent>(Channel.BUFFERED)
     val navEvents = _navEvents.receiveAsFlow()
 
-    private val _userLogin = MutableStateFlow(FirestoreUser())
+    private val _userLogin = MutableStateFlow<User?>(null)
 
 
     fun lazyInitialization() {
@@ -102,7 +104,7 @@ class LoginVM @Inject constructor(
         // la variable es (null), ¡Y se corta la función!.
         if (_acceptPolicy.value == null) {
             _acceptPolicy.value = true
-            _userLogin.update { it.copy(policyAccepted = true) }
+            _userLogin.update { it?.copy(policyAccepted = true) }
             return
         }
 
@@ -110,7 +112,7 @@ class LoginVM @Inject constructor(
         // con lo cual no se va a mostrar marcación interna en el
         // checkbox.
         _acceptPolicy.value = null
-        _userLogin.update { it.copy(policyAccepted = false) }
+        _userLogin.update { it?.copy(policyAccepted = false) }
     }
 
 
@@ -121,7 +123,7 @@ class LoginVM @Inject constructor(
      * */
     fun setTrueInCheckBox() {
         _acceptPolicy.value = true
-        _userLogin.update { it.copy(policyAccepted = true) }
+        _userLogin.update { it?.copy(policyAccepted = true) }
     }
 
 
@@ -230,7 +232,7 @@ class LoginVM @Inject constructor(
                 }
 
                 is GoogleSignInResult.Error -> {
-                    Log.e("LOGIN VM", "NameError de credencial", result.cause)
+                    Log.e("PERSONAL_INFO VM", "NameError de credencial", result.cause)
                     updateGoogleUiState(GoogleUiState.Error(result.userMessage))
                 }
 
@@ -252,14 +254,18 @@ class LoginVM @Inject constructor(
                 signInWithGoogle(idToken)
 
             }.onSuccess {
-                _userLogin.update { userLogIn ->
-                    userLogIn.copy(
-                        userId = it.uid,
-                        displayName = "",
-                        email = it.email ?: "",
-                        emailVerified = it.emailVerified
-                    )
-                }
+                _userLogin.value = User(
+                    userId = it.uid,
+                    displayName = "",
+                    email = it.email ?: "",
+                    emailVerified = it.emailVerified,
+                    policyAccepted = _acceptPolicy.value == true,
+                    firstName = "",
+                    firstLastName = "",
+                    birthDay = "",
+                    sex = "",
+                    createdIn = Instant.now(),
+                )
 
                 _isLoggedWithGoogle.value = true
                 updateGoogleUiState(GoogleUiState.Success)
@@ -297,14 +303,18 @@ class LoginVM @Inject constructor(
                 signInWithEmail(_emailText.value, _passwordText.value)
 
             }.onSuccess {
-                _userLogin.update { userLogIn ->
-                    userLogIn.copy(
-                        userId = it.uid,
-                        displayName = "",
-                        email = it.email ?: "",
-                        emailVerified = it.emailVerified
-                    )
-                }
+                _userLogin.value = User(
+                    userId = it.uid,
+                    displayName = "",
+                    email = it.email ?: "",
+                    emailVerified = it.emailVerified,
+                    policyAccepted = _acceptPolicy.value == true,
+                    firstName = "",
+                    firstLastName = "",
+                    birthDay = "",
+                    sex = "",
+                    createdIn = Instant.now(),
+                )
                 _isLoggedWithEmail.value = true
                 updateEmailUiState(EmailUiState.Success)
 
@@ -364,14 +374,18 @@ class LoginVM @Inject constructor(
                 createUserWithEmail(_emailText.value, _passwordText.value)
 
             }.onSuccess {
-                _userLogin.update { userLogIn ->
-                    userLogIn.copy(
-                        userId = it.uid,
-                        displayName = "",
-                        email = it.email ?: "",
-                        emailVerified = it.emailVerified
-                    )
-                }
+                _userLogin.value = User(
+                    userId = it.uid,
+                    displayName = "",
+                    email = it.email ?: "",
+                    emailVerified = it.emailVerified,
+                    policyAccepted = _acceptPolicy.value == true,
+                    firstName = "",
+                    firstLastName = "",
+                    birthDay = "",
+                    sex = "",
+                    createdIn = Instant.now(),
+                )
                 _isLoggedWithEmail.value = true
                 updateEmailUiState(EmailUiState.Success)
 
@@ -415,7 +429,8 @@ class LoginVM @Inject constructor(
 
             runCatching {
                 withTimeout(8_000) {
-                    addUserToFirestore(_userLogin.value)
+                    if (_userLogin.value != null)
+                        addUserToFirestore(_userLogin.value!!)
                 }
 
             }.onSuccess {

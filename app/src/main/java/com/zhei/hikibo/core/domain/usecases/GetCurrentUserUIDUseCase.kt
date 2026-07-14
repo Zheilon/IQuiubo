@@ -4,7 +4,7 @@ import com.zhei.hikibo.core.domain.repository.AuthRepository
 import javax.inject.Inject
 
 
-class GetCurrentUserUseCase @Inject constructor(
+class GetCurrentUserUIDUseCase @Inject constructor(
     private val repo: AuthRepository
 ) {
 

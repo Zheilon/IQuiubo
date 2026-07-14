@@ -1,17 +1,15 @@
 package com.zhei.hikibo
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.getValue
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.zhei.hikibo.core.common.Constants
 import com.zhei.hikibo.core.navigation.MyNavGraph
-import com.zhei.hikibo.core.navigation.Scenes
 import com.zhei.hikibo.core.presentation.AppViewModel
+import com.zhei.hikibo.core.presentation.StateSceneVM
+import com.zhei.hikibo.features.home.presentation.HomeVM
+import com.zhei.hikibo.features.manual_entry_interpretation.presentation.InterpretationVM
 import com.zhei.hikibo.ui.theme.HikiboTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -26,31 +24,22 @@ class MainActivity : ComponentActivity() {
 
         setContent {
 
-            val authLogin: AppViewModel = hiltViewModel()
+            val appViewModel: AppViewModel = hiltViewModel()
+            val stateVM: StateSceneVM = hiltViewModel()
+            val homeVM: HomeVM = hiltViewModel()
+            val interpretationVM: InterpretationVM = hiltViewModel()
 
-            val startState by authLogin.startState.collectAsStateWithLifecycle()
-            val userFirst = authLogin.loginFirst
+            // Mantiene el splash screen hasta que deje de ser (null).
+            splash.setKeepOnScreenCondition { appViewModel.reactiveLogin.value == null }
 
-            Log.e("(MainActivity)", startState.toString())
 
             HikiboTheme {
-                when (startState) {
-                    AppViewModel.StartState.Loading   -> {
-                        // Mantengo el splash mientras valida la existencia del user
-                        splash.setKeepOnScreenCondition {
-                            startState is AppViewModel.StartState.Loading
-                        }
-
-                    }
-
-                    AppViewModel.StartState.LoggedOut, AppViewModel.StartState.NeedsGate ->  {
-                        MyNavGraph(scene = Scenes.LoginScene)
-                    }
-
-                    AppViewModel.StartState.Ready -> {
-                        MyNavGraph(scene = Scenes.PersonalInfoScene)
-                    }
-                }
+                MyNavGraph(
+                    appViewModel,
+                    stateVM,
+                    homeVM,
+                    interpretationVM
+                )
             }
         }
     }

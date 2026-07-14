@@ -1,7 +1,6 @@
 package com.zhei.hikibo.features.login.presentation
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -16,6 +15,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -40,20 +40,22 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.AttachEmail
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.SettingsAccessibility
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.BottomSheetDefaults
@@ -80,7 +82,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
@@ -90,6 +91,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -101,7 +104,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -114,8 +119,10 @@ import com.zhei.hikibo.core.common.MyFont
 import com.zhei.hikibo.core.common.ResponsiveLineHeight
 import com.zhei.hikibo.core.common.ResponsiveText
 import com.zhei.hikibo.core.common.locals.LocalSpacing
+import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.log
 
 
 // Names: hoppy
@@ -171,23 +178,17 @@ import kotlinx.coroutines.launch
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // ImagenCenter()
-
-            // Spacer(modifier = Modifier.weight(1f))
-
-            // BoxSloganUpper()
-
             TextUpperLoginBox()
 
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(spacing.xl))
 
             BoxToJoinWithSomething(loginVM)
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(spacing.xs))
 
             PolicyAndPrivArea(loginVM)
 
-            Spacer(modifier = Modifier.height(5.dp))
+            Spacer(modifier = Modifier.height(spacing.sm))
 
             FirebaseSendCapError(loginVM)
 
@@ -260,36 +261,40 @@ import kotlinx.coroutines.launch
     // por detras se vea la linea divisoria, y encima de esta la
     // palabra Hikibo.
 
-    val shapePill = RoundedCornerShape(30.dp)
+    val spacing = LocalSpacing.current
+    val shapePill = RoundedCornerShape(10.dp)
 
-    Box(
-        modifier = Modifier
-            .wrapContentSize(),
-        contentAlignment = Alignment.Center
+    Row (
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
     ) {
 
-        HorizontalDivider(thickness = 1.dp, color = Color(0xFF0C3A47).copy(alpha = 0.15f))
-
-        Row (
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
+        Box(
+            modifier = Modifier
+                .size(spacing.xxl)
+                .background(IQuiuboColorPallete.moradoPrimario, shapePill),
+            contentAlignment = Alignment.Center
         ) {
 
-            //listOf(Color(0xFF00A6FF), Color(0xFFFF0026), Color(0xFFFFD900))
-
-            Text(
-                text = buildAnnotatedString { append("IQuiubo") },
-                color = Color(0xFF5500FF),
-                fontFamily = MyFont.jakartaSansRegular,
-                fontSize = ResponsiveText.displayBig(),
-                lineHeight = ResponsiveLineHeight.displayBig(),
-                fontWeight = FontWeight.ExtraBold,
-                modifier = Modifier
-                    .shadow(5.dp, shapePill)
-                    .background(color = Color.White, shapePill)
-                    .padding(start = 15.dp, end = 15.dp, top = 5.dp, bottom = 5.dp)
+            Icon(
+                imageVector = Icons.Default.SettingsAccessibility,
+                contentDescription = null,
+                tint = IQuiuboColorPallete.backgroundLight,
+                modifier = Modifier.size(spacing.xl)
             )
         }
+
+        Spacer(modifier = Modifier.width(spacing.md))
+
+        Text(
+            text = buildAnnotatedString { append("IQuiubo") },
+            color = IQuiuboColorPallete.primaryText,
+            fontFamily = MyFont.workSansRegular,
+            fontSize = ResponsiveText.displayBig(),
+            lineHeight = ResponsiveLineHeight.displayBig(),
+            fontWeight = FontWeight.ExtraBold,
+        )
     }
 }
 
@@ -306,59 +311,33 @@ import kotlinx.coroutines.launch
     val shape = RoundedCornerShape(20.dp)
 
 
-    Box(
-        modifier = Modifier
-            .shadow(8.dp, shape = shape)
-            // Azul Ultramarine good = 0xFF0079C4
-            // Azul muy claro = 0xFFB8EAFF
-            .background(color = Color.White, shape = shape)
+    Column (
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.Start
     ) {
 
-        Column (
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
 
-            Column (
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(spacing.md),
-                verticalArrangement = Arrangement.spacedBy(spacing.sm),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+        TextInTheMiddleV2()
 
-                TextTitleInMiddle(loginVM)
+        //if (!logged) {
+        //    TextToSignInWithSomething()
+        //}
+        
+        Spacer(modifier = Modifier.height(spacing.xl))
 
-                if (!logged) {
-                    TextToSignInWithSomething()
-                }
-            }
+        if (!emailLogged) {
+            ButtonToSignInWithGoogle(loginVM)
+            Spacer(modifier = Modifier.height(spacing.md))
+        }
+            
+        if (!googleLogged) {
+            ButtonToSignInWithEmail(loginVM)
+            Spacer(modifier = Modifier.height(spacing.md))
+        }
 
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        color = Color(0xFFFFE98A),
-                        RoundedCornerShape(
-                            topStart = spacing.xl,
-                            topEnd = spacing.xl)
-                        )
-                    .padding(spacing.md),
-                verticalArrangement = Arrangement.spacedBy(spacing.sm),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-
-                if (!emailLogged)
-                    ButtonToSignInWithGoogle(loginVM)
-
-                if (!googleLogged)
-                    ButtonToSignInWithEmail(loginVM)
-
-                if (!logged)
-                    IfYouDontHaveAccount(loginVM)
-            }
+        if (!logged) {
+            IfYouDontHaveAccount(loginVM)
+            Spacer(modifier = Modifier.height(spacing.md))
         }
     }
 }
@@ -397,6 +376,64 @@ import kotlinx.coroutines.launch
 }
 
 
+@Composable private fun TextInTheMiddleV2() {
+    val spacing = LocalSpacing.current
+
+    val inlineId = "inteligente"
+
+    Text(
+        text = buildAnnotatedString {
+            append("Tu camino hacia un control metabólico ")
+            appendInlineContent(inlineId, "inteligente")  // 👈 placeholder
+        },
+        inlineContent = mapOf(
+            inlineId to InlineTextContent(
+                placeholder = Placeholder(
+                    width = 5.9.em,          // ancho reservado (ajústalo al texto)
+                    height = 1.3.em,         // alto reservado
+                    placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter
+                )
+            ) {
+                // 👇 Este composable se renderiza DENTRO del texto
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = IQuiuboColorPallete.accentMiddle,
+                            shape = RoundedCornerShape(8.dp)      // 👈 tu shape
+                        )
+                        .padding(horizontal = 6.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "inteligente",
+                        fontFamily = MyFont.workSansRegular,
+                        fontSize = ResponsiveText.headline(),
+                        lineHeight = ResponsiveLineHeight.headline(),
+                        color = IQuiuboColorPallete.primaryText,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        ),
+        fontFamily = MyFont.workSansRegular,
+        fontSize = ResponsiveText.headline(),
+        lineHeight = ResponsiveLineHeight.headline(),
+        color = IQuiuboColorPallete.primaryText,
+        fontWeight = FontWeight.Bold
+    )
+    
+    Spacer(modifier = Modifier.height(spacing.md))
+
+    Text(
+        text = "Entiende tus resultados y cuida de tu salud paso a paso",
+        fontFamily = MyFont.workSansRegular,
+        fontSize = ResponsiveText.body(),
+        lineHeight = ResponsiveLineHeight.body(),
+        color = IQuiuboColorPallete.secondaryText,
+    )
+}
+
+
 @Composable private fun TextToSignInWithSomething() {
 
     Text(
@@ -415,13 +452,18 @@ import kotlinx.coroutines.launch
 ) {
 
     val spacing = LocalSpacing.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     val googleUiState by loginVM.googleUiState.collectAsState()
     val logged by loginVM.isLoggedWithGoogle
-    val shape = RoundedCornerShape(100.dp)
+    val shape = RoundedCornerShape(20.dp)
 
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
+    val borderColor = if (logged) Color(0xFFD5FFD4)
+    else IQuiuboColorPallete.moradoPrimario
+
+    val iconColor = if (logged) Color(0xFF089400)
+    else IQuiuboColorPallete.moradoPrimario
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -442,6 +484,7 @@ import kotlinx.coroutines.launch
         Button(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(60.dp)
                 .scale(scale),
             interactionSource = interactionSource,
             contentPadding = PaddingValues(spacing.sm),
@@ -449,11 +492,12 @@ import kotlinx.coroutines.launch
             // enable color: Ultramarine = 0xFF008CE3
             colors = ButtonDefaults.buttonColors(
                 // Color anterior: Color(0xFFFBF7F1)
-                containerColor = Color.White,
+                containerColor = IQuiuboColorPallete.buttonEnabledTwo,
                 disabledContainerColor = Color(0xFFD5FFD4)
             ),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 5.dp),
             shape = shape,
+            border = BorderStroke(1.dp, borderColor),
             // ¿Qué lógica tiene este enabled aquí?: Cuando no se ha loggeado
             // el botón funciona normalmente pero cuando se loggea el
             // botón se desactiva.
@@ -470,9 +514,10 @@ import kotlinx.coroutines.launch
         ) {
 
             Image(
-                painter = painterResource(id = R.drawable.ic_google),
+                painter = painterResource(id = R.drawable.ic_google_v2),
                 contentDescription = null,
-                modifier = Modifier.size(30.dp)
+                modifier = Modifier.size(30.dp),
+                colorFilter = ColorFilter.tint(iconColor)
             )
 
             Spacer(modifier = Modifier.width(spacing.sm))
@@ -493,7 +538,7 @@ import kotlinx.coroutines.launch
                     lineHeight = ResponsiveLineHeight.button(),
                     fontWeight = if (logged) FontWeight.ExtraBold else FontWeight.Normal,
                     color = if (logged) Color(0xFF089400) else Color(0xFF0C3A47),
-                    fontFamily = MyFont.jakartaSansRegular,
+                    fontFamily = MyFont.workSansRegular,
                 )
             }
         }
@@ -534,7 +579,7 @@ import kotlinx.coroutines.launch
     val emailUiState by loginVM.emailUiState.collectAsState()
     val isLogged by loginVM.isLoggedWithEmail
 
-    val shape = RoundedCornerShape(100.dp)
+    val shape = RoundedCornerShape(20.dp)
     var showSheet by remember { mutableStateOf(false) }
 
     val interactionSource = remember { MutableInteractionSource() }
@@ -546,6 +591,9 @@ import kotlinx.coroutines.launch
         label = "press_scale"
     )
 
+    val iconColor = if (isLogged) Color(0xFF089400) else
+        IQuiuboColorPallete.backgroundLight
+
     // EmailErrorUI(loginVM)
 
     ButtonRippleColor(
@@ -555,11 +603,12 @@ import kotlinx.coroutines.launch
         Button(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(60.dp)
                 .scale(scale),
             interactionSource = interactionSource,
             contentPadding = PaddingValues(spacing.sm),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
+                containerColor = IQuiuboColorPallete.moradoPrimario,
                 disabledContainerColor = Color(0xFFD5FFD4)
             ),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
@@ -579,7 +628,7 @@ import kotlinx.coroutines.launch
                 imageVector = Icons.Default.Email,
                 contentDescription = null,
                 modifier = Modifier.size(30.dp),
-                tint = Color(0xFF0088D1)
+                tint = iconColor
             )
 
             Spacer(modifier = Modifier.width(spacing.sm))
@@ -599,8 +648,8 @@ import kotlinx.coroutines.launch
                     fontSize = ResponsiveText.button(),
                     lineHeight = ResponsiveLineHeight.button(),
                     fontWeight = if (isLogged) FontWeight.ExtraBold else FontWeight.Normal,
-                    color = if (isLogged) Color(0xFF089400) else Color(0xFF0C3A47),
-                    fontFamily = MyFont.jakartaSansRegular,
+                    color = if (isLogged) Color(0xFF089400) else IQuiuboColorPallete.backgroundLight,
+                    fontFamily = MyFont.workSansRegular,
                 )
             }
         }
@@ -649,6 +698,8 @@ import kotlinx.coroutines.launch
     onDismiss: () -> Unit
 ) {
 
+    val spacing = LocalSpacing.current
+
     val isLogged by loginVM.isLoggedWithEmail
     val email by loginVM.emailText.collectAsState()
     val password by loginVM.passwordText.collectAsState()
@@ -677,7 +728,7 @@ import kotlinx.coroutines.launch
                 .fillMaxWidth()
                 .imePadding()
                 .navigationBarsPadding()
-                .padding(start = 20.dp, end = 20.dp)
+                .padding(horizontal = spacing.lg)
         ) {
             Text(
                 text = "Inicio de sesión",
@@ -794,7 +845,9 @@ import kotlinx.coroutines.launch
                 ) { append("Registrate aquí") } },
             fontSize = ResponsiveText.caption(),
             lineHeight = ResponsiveLineHeight.caption(),
-            fontFamily = MyFont.jakartaSansRegular,
+            fontFamily = MyFont.workSansRegular,
+            fontWeight = FontWeight.Bold,
+            color = IQuiuboColorPallete.secondaryText,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(
@@ -918,55 +971,39 @@ fun ModalBottonForCreateUserWithEmail(
     val spacing = LocalSpacing.current
     val shape = RoundedCornerShape(20.dp)
 
-    Column(
-        modifier = Modifier
-            // 1. Azul = 0xFFE0E7EC
-            .shadow(8.dp, shape)
-            .background(color = Color.White, shape)
-            .padding(spacing.md)
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        // Azul más claro: 00B2FF
-        // Azul más oscuro: 003C6B
+
+        CheckBoxForPolicityAndPriv(loginVM)
+
+        Spacer(modifier = Modifier.width(spacing.md))
+
+        // "He leído y acepto la Política de Privacidad y el Tratamiento de mis datos"
         Text(
-            text = "Leer política de privacidad",
-            color = Color(0xFF003C6B),
-            fontFamily = MyFont.jakartaSansRegular,
-            fontSize = ResponsiveText.body(),
-            lineHeight = ResponsiveLineHeight.body(),
-            textDecoration = TextDecoration.Underline,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { loginVM.setShowPolicity() }
+            text = buildAnnotatedString {
+                append("Acepto la ")
+                withStyle(
+                    SpanStyle(
+                        color = IQuiuboColorPallete.moradoPrimario,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                ) {
+                    append("política de tratamiento de datos")
+                }
+            },
+            fontFamily = MyFont.workSansRegular,
+            lineHeight = ResponsiveLineHeight.caption(),
+            fontSize = ResponsiveText.caption(),
+            color = Color(0xFF0C3A47),
+            textAlign = TextAlign.Justify,
+            modifier = Modifier.clickable { loginVM.setShowPolicity() }
         )
-
-        Spacer(modifier = Modifier.height(spacing.sm))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start
-        ) {
-            // "He leído y acepto la Política de Privacidad y el Tratamiento de mis datos"
-            Text(
-                text = buildAnnotatedString {
-                    append("He ")
-                    withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append("leído ") }
-                    append("y ")
-                    withStyle(SpanStyle(fontWeight = FontWeight.SemiBold)) { append("acepto ") }
-                    append("la Política de Privacidad y el tratamiento de mis datos.")
-                },
-                fontFamily = MyFont.jakartaSansRegular,
-                lineHeight = ResponsiveLineHeight.caption(),
-                fontSize = ResponsiveText.caption(),
-                color = Color(0xFF0C3A47),
-                textAlign = TextAlign.Start,
-                modifier = Modifier.width((Constants.WIDTH_DP_DEVICE() + 50.dp) / 2)
-            )
-
-            CheckBoxForPolicityAndPriv(loginVM)
-        }
     }
+
 }
 
 
@@ -974,33 +1011,31 @@ fun ModalBottonForCreateUserWithEmail(
     vm: LoginVM
 ) {
 
+    val spacing = LocalSpacing.current
     val toggleState by vm.acceptPolicy
     val shape = RoundedCornerShape(5.dp)
 
-    Row (
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+    val backgroundColor = if (toggleState != null) IQuiuboColorPallete.moradoPrimario
+    else IQuiuboColorPallete.backgroundLight
+
+    Box(
+        modifier = Modifier
+            .size(spacing.lg)
+            .border(1.dp, color = IQuiuboColorPallete.moradoPrimario, shape)
+            .background(backgroundColor, shape)
+            .clip(shape)
+            .clickable { vm.setCheckBox() },
+        contentAlignment = Alignment.Center
     ) {
 
-        Box(
-            modifier = Modifier
-                .size(35.dp)
-                .border(1.dp, color = Color(0xFF005575), shape)
-                .background(color = Color.White, shape)
-                .clip(shape)
-                .clickable { vm.setCheckBox() }
-        ) {
+        toggleState?.let {
 
-            toggleState?.let {
-
-                Image(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    colorFilter = ColorFilter.tint(Color(0xFF0062A3)),
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
+            Image(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(IQuiuboColorPallete.backgroundLight),
+                modifier = Modifier.size(spacing.md)
+            )
         }
     }
 }
@@ -1063,6 +1098,7 @@ private val policySections = listOf(
     vm: LoginVM
 ) {
 
+    val spacing = LocalSpacing.current
     val shape = RoundedCornerShape(20.dp)
     val policityState by vm.showPolicity
 
@@ -1114,7 +1150,14 @@ private val policySections = listOf(
                     )
                 }
                 
-                items(policySections) { section ->
+                items(policySections) {section ->
+                    HorizontalDivider(
+                        thickness = 1.dp,
+                        color = Color.Gray
+                    )
+
+                    Spacer(modifier = Modifier.height(spacing.md))
+
                     Text(
                         text = section.title,
                         fontSize = ResponsiveText.title(),
@@ -1128,7 +1171,7 @@ private val policySections = listOf(
                         color = Color.Black,
                         fontSize = ResponsiveText.body(),
                         lineHeight = ResponsiveLineHeight.body(),
-                        fontFamily = MyFont.spaceGroteskRegular,
+                        fontFamily = MyFont.workSansRegular,
                         textAlign = TextAlign.Start
                     )
                 }
@@ -1136,7 +1179,7 @@ private val policySections = listOf(
                 item {
                     Button(
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF945B00)
+                            containerColor = IQuiuboColorPallete.moradoPrimario
                         ),
                         onClick = {
                             vm.setShowPolicity()
@@ -1193,7 +1236,7 @@ private val policySections = listOf(
                         .size(50.dp)
                         .offset(x = (-Constants.WIDTH_DP_DEVICE() / 2) + 20.dp, y = (-40).dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF945B00)
+                        containerColor = IQuiuboColorPallete.moradoPrimario
                     ),
                     contentPadding = PaddingValues(0.dp),
                     shape = RoundedCornerShape(30.dp),

@@ -12,6 +12,9 @@ interface StateSceneDao {
     @Query("SELECT * FROM state_scene")
     fun getAll(): Flow<List<StateSceneEntity>>
 
+    @Query("SELECT state FROM state_scene WHERE name =:name LIMIT 1")
+    fun observeState(name: String): Flow<Boolean?>
+
     @Query("SELECT * FROM state_scene WHERE name =:nameState LIMIT 1")
     suspend fun getStateByName(nameState: String) : StateSceneEntity?
 

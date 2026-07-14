@@ -20,7 +20,7 @@ android {
 
         // funcionalidades nuevas que no rompen nada. Ej:
         // agregas el módulo de interpretación de resultados en Diabeat.
-        val minor = 1
+        val minor = 3
 
         // Correcciones bugs o ajustes menores.
         val patch = 0

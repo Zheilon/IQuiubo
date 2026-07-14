@@ -3,10 +3,10 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import com.google.firebase.Timestamp
+import java.time.Instant
 import java.time.LocalDate
 import java.time.Period
 import java.time.ZoneId
-import java.time.ZoneOffset
 
 
 /**
@@ -33,6 +33,20 @@ fun LocalDate.toTimeStamp(): Timestamp {
  * */
 fun Timestamp.toLocalDate(): LocalDate =
     this.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+
+
+/**
+ * Convierte un Instant en Timestamp
+ * */
+fun Instant.toTimestamp(): Timestamp =
+    Timestamp(this.epochSecond, this.nano)
+
+
+/**
+ * Convierte un Timestamp a Instant
+ * */
+fun Timestamp.toInstant(): Instant =
+    Instant.ofEpochSecond(this.seconds, this.nanoseconds.toLong())
 
 
 /**

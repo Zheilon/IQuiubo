@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.sp
 
 object ResponsiveLineHeight {
 
-    private const val RELATION = 1.1f
+    private const val RELATION = 1.3f
 
 
     /**
@@ -22,7 +22,7 @@ object ResponsiveLineHeight {
      * o elementos visualmente dominantes.
      * */
     @Composable
-    fun displayLarge(): TextUnit =
+    fun displayMiddle(): TextUnit =
         (ResponsiveText.displaymiddle().value * RELATION).sp
 
 
@@ -69,6 +69,11 @@ object ResponsiveLineHeight {
     @Composable
     fun caption(): TextUnit =
         (ResponsiveText.caption().value * RELATION).sp
+
+
+    @Composable
+    fun small(): TextUnit =
+        (ResponsiveText.small().value * RELATION).sp
 
 
     /**
