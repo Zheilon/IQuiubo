@@ -64,6 +64,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.geometry.Size
@@ -115,38 +116,42 @@ import kotlin.math.sin
     user.toString().let { Log.e("HOME UI, USER", it) }
     //LockScreenOrientation(orientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(IQuiuboColorPallete.backgroundLight)
-            .padding(horizontal = spacing.md)
-            .padding(top = spacing.md),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Column(
+        modifier = Modifier.fillMaxSize()
     ) {
 
-        item { FirstSection(homeVM, user) }
+        FirstSection(homeVM, user)
 
-        item { Spacer(modifier = Modifier.height(spacing.md)) }
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(IQuiuboColorPallete.backgroundLight)
+                .padding(horizontal = spacing.md),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
-        item { SecondSection() }
+            item { Spacer(modifier = Modifier.height(spacing.md)) }
 
-        item { Spacer(modifier = Modifier.height(spacing.lg)) }
+            item { SecondSection() }
 
-        item { ThirdSection() }
+            item { Spacer(modifier = Modifier.height(spacing.lg)) }
 
-        item { Spacer(modifier = Modifier.height(spacing.lg)) }
+            item { ThirdSection() }
 
-        item { FourSection() }
+            item { Spacer(modifier = Modifier.height(spacing.lg)) }
 
-        item { Spacer(modifier = Modifier.height(spacing.lg)) }
+            item { FourSection() }
 
-        item { FiveSection() }
+            item { Spacer(modifier = Modifier.height(spacing.lg)) }
+
+            item { FiveSection() }
 
 
-        // Este spacer queda a lo último para generar un espacio entre
-        // el LazyColumn y el NavigationBar.
-        item { Spacer(modifier = Modifier.height(spacing.md)) }
+            // Este spacer queda a lo último para generar un espacio entre
+            // el LazyColumn y el NavigationBar.
+            item { Spacer(modifier = Modifier.height(spacing.md)) }
+        }
     }
 }
 
@@ -157,13 +162,18 @@ import kotlin.math.sin
     user: User
 ) {
 
+    val spacing = LocalSpacing.current
+
     // Row() principal, este contendrá en la izquierda
     // el saludo y el nombre, y en la derecha el icono
     // para entrar a las configuraciones del perfil.
 
     Row (
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .background(IQuiuboColorPallete.moradoPrimario)
+            .padding(spacing.lg)
+            .statusBarsPadding(),
         verticalAlignment = Alignment.Bottom
     ) {
 
@@ -190,7 +200,7 @@ import kotlin.math.sin
             fontSize = ResponsiveText.caption(),
             lineHeight = ResponsiveLineHeight.caption(),
             fontFamily = MyFont.workSansRegular,
-            color = IQuiuboColorPallete.secondaryText
+            color = Color.White
         )
 
         Text(
@@ -198,7 +208,7 @@ import kotlin.math.sin
             fontSize = ResponsiveText.headline(),
             lineHeight = ResponsiveLineHeight.headline(),
             fontFamily = MyFont.workSansRegular,
-            color = IQuiuboColorPallete.primaryText,
+            color = IQuiuboColorPallete.backgroundLight,
             fontWeight = FontWeight.ExtraBold
         )
     }
@@ -214,8 +224,9 @@ import kotlin.math.sin
         modifier = Modifier.size(50.dp),
         contentPadding = PaddingValues(0.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = IQuiuboColorPallete.moradoPrimario
+            containerColor = IQuiuboColorPallete.LOW_PINK
         ),
+        elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 8.dp),
         shape = CircleShape,
         onClick = { }
     ) {
@@ -225,7 +236,7 @@ import kotlin.math.sin
             fontFamily = MyFont.workSansRegular,
             fontSize = ResponsiveText.body(),
             lineHeight = ResponsiveLineHeight.body(),
-            color = IQuiuboColorPallete.backgroundLight,
+            color = Color.Black,
             fontWeight = FontWeight.ExtraBold
         )
     }
@@ -236,6 +247,7 @@ import kotlin.math.sin
 @Composable private fun SecondSection() {
 
     val spacing = LocalSpacing.current
+    val shape = RoundedCornerShape(15.dp)
 
     // Este será un Row el cual all cuerpo
     // será clicable, en la izquirda va a haber un icono como de un documento,
@@ -247,7 +259,15 @@ import kotlin.math.sin
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(IQuiuboColorPallete.moradoPrimario, RoundedCornerShape(15.dp))
+            .background(
+                brush = Brush.linearGradient(
+                    listOf(
+                        IQuiuboColorPallete.moradoPrimario,
+                        IQuiuboColorPallete .moradoPrimario.copy(red = 0.8f)
+                    )
+                ),
+                shape = shape
+            )
             .clickable(
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }

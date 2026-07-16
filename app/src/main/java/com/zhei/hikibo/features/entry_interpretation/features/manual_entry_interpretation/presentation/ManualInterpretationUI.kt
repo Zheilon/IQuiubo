@@ -1,17 +1,23 @@
-package com.zhei.hikibo.features.manual_entry_interpretation.presentation
+package com.zhei.hikibo.features.entry_interpretation.features.manual_entry_interpretation.presentation
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,11 +31,15 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -41,19 +51,25 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -67,39 +83,30 @@ import com.zhei.hikibo.core.common.ResponsiveText
 import com.zhei.hikibo.core.common.dashedBorder
 import com.zhei.hikibo.core.common.locals.LocalSpacing
 import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
+import kotlinx.coroutines.android.awaitFrame
+import kotlinx.coroutines.delay
 
 
 @Composable fun ManualInterpretationUI(
-    interpretationVM: InterpretationVM
+    manualInterpretationVM: ManualInterpretationVM,
 ) {
 
 
     val spacing = LocalSpacing.current
 
     Column(
-        modifier = Modifier
-            .background(IQuiuboColorPallete.backgroundLight)
+        modifier = Modifier.fillMaxSize()
     ) {
 
-        FirstSection(interpretationVM)
+        FirstSection(manualInterpretationVM)
 
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(IQuiuboColorPallete.backgroundLight)
-                .padding(horizontal = spacing.md)
         ) {
 
-            item { SecondSection(interpretationVM) }
-
-            item { Spacer(modifier = Modifier.height(spacing.lg)) }
-
-            item { ThirdSection(interpretationVM) }
-
-
-            // Este spacer queda a lo último para generar un espacio entre
-            // el LazyColumn y el NavigationBar.
-            item { Spacer(modifier = Modifier.height(spacing.md)) }
+            SecondSection(manualInterpretationVM)
         }
     }
 }
@@ -107,7 +114,7 @@ import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
 
 
 @Composable private fun FirstSection(
-    interpretationVM: InterpretationVM
+    manualInterpretationVM: ManualInterpretationVM
 ) {
 
     val spacing = LocalSpacing.current
@@ -119,15 +126,22 @@ import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                IQuiuboColorPallete.moradoPrimario,
+                IQuiuboColorPallete.accentMiddle,
                 //RoundedCornerShape(bottomStart = spacing.xxl, bottomEnd = spacing.xxl)
             )
-            .padding(vertical = spacing.lg, horizontal = spacing.lg)
+            .padding(spacing.lg)
+            .statusBarsPadding()
     ) {
         
         TitleFirstSection()
 
         SubtitleFirstSection()
+
+        //ThirdSection(manualInterpretationVM)
+
+        ButtonToNavigate(manualInterpretationVM)
+        
+        //CustomTextfieldSearch(manualInterpretationVM)
     }
 }
 
@@ -136,12 +150,12 @@ import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
 @Composable private fun TitleFirstSection() {
     
     Text(
-        text =  "Portal de ingreso de datos", // Interpreta tus resultados
+        text =  "Selecciona tus exámenes", // Interpreta tus resultados
         fontSize = ResponsiveText.headline(),
         lineHeight = ResponsiveLineHeight.headline(),
         fontFamily = MyFont.spaceGroteskRegular,
         fontWeight = FontWeight.Bold,
-        color = Color.White
+        color = IQuiuboColorPallete.primaryText
     )
 }
 
@@ -153,15 +167,84 @@ import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
         text = "¡Busca el nombre de los exámenes que te tomaste!",
         fontSize = ResponsiveText.caption(),
         lineHeight = ResponsiveLineHeight.caption(),
-        color = IQuiuboColorPallete.backgroundLight,
+        color = IQuiuboColorPallete.secondaryText,
         fontFamily = MyFont.jakartaSansRegular
     )
 }
 
 
 
+@Composable private fun ButtonToNavigate(
+    manualInterpretationVM: ManualInterpretationVM
+) {
+
+    val spacing = LocalSpacing.current
+    val selectedList by manualInterpretationVM.selectedExams.collectAsStateWithLifecycle()
+
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+
+    // Animación del botón
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.90f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "press_scale"
+    )
+
+    if (selectedList.isNotEmpty())
+        Spacer(modifier = Modifier.height(spacing.md))
+
+    AnimatedVisibility(
+        visible = selectedList.isNotEmpty(),
+        enter = fadeIn(animationSpec = tween(350)) +
+            slideInVertically(
+                initialOffsetY = { it / 2 },
+                animationSpec = spring(
+                    dampingRatio = 0.75f,
+                    stiffness = Spring.StiffnessMediumLow
+                )
+            ) +
+            expandVertically(
+                expandFrom = Alignment.Bottom,
+                animationSpec = spring(
+                    dampingRatio = 0.85f,
+                    stiffness = Spring.StiffnessMediumLow
+                )
+            ),
+        exit = fadeOut(animationSpec = tween(180)) +
+            shrinkVertically(
+                shrinkTowards = Alignment.Bottom,
+                animationSpec = tween(180)
+            )
+    ) {
+
+        Button(
+            interactionSource = interactionSource,
+            modifier = Modifier
+                .fillMaxWidth()
+                .scale(scale),
+            shape = CircleShape,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.White
+            ),
+            onClick = {}
+        ) {
+
+            Text(
+                text = "Continuar (${selectedList.size})",
+                fontSize = ResponsiveText.button(),
+                lineHeight = ResponsiveLineHeight.button(),
+                fontFamily = MyFont.jakartaSansRegular,
+                color = IQuiuboColorPallete.primaryText
+            )
+        }
+    }
+}
+
+
+
 @Composable private fun SecondSection(
-    interpretationVM: InterpretationVM
+    manualInterpretationVM: ManualInterpretationVM
 ) {
 
     val spacing = LocalSpacing.current
@@ -170,26 +253,27 @@ import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
         modifier = Modifier.fillMaxWidth()
     ) {
 
-        CustomTextfieldSearch(interpretationVM)
-
         // Este Spacer se traslado dentro de la función LazyColumnExamNames...
         // dentro del ?.let{}, ya que si no hay lista se va a conservar el
         // espacio que hay más arriba, en el composable principal.
         // Spacer(modifier = Modifier.height(spacing.md))
 
-        ExamNamesSecondSection(interpretationVM)
+        //CustomTextfieldSearch(manualInterpretationVM)
+
+        ExamNamesSecondSection(manualInterpretationVM)
     }
 }
 
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable private fun CustomTextfieldSearch(
-    interpretationVM: InterpretationVM
+    manualInterpretationVM: ManualInterpretationVM
 ) {
 
     val spacing = LocalSpacing.current
 
-    val text by interpretationVM.exam.collectAsStateWithLifecycle()
+    val text by manualInterpretationVM.exam.collectAsStateWithLifecycle()
 
     // Esta segunda sección será un textfield super personalizado
     // con el cual se pueda buscar el nombre del examen
@@ -204,7 +288,7 @@ import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
 
     val focusedColor by animateColorAsState(
         targetValue = when {
-            isFocused -> IQuiuboColorPallete.moradoPrimario
+            isFocused -> IQuiuboColorPallete.LOW_PINK
             else -> IQuiuboColorPallete.secondaryText
         },
         animationSpec = tween(250),
@@ -227,10 +311,35 @@ import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
         label = "anime_icon"
     )
 
+    // Crea el "solicitante de vista"
+    val bringIntoViewRequester = remember { BringIntoViewRequester() }
+
+    // Cuando el campo gana foco, pídele al scroll que lo traiga a la vista
+    LaunchedEffect(isFocused) {
+        if (isFocused) {
+            // pequeño delay para esperar a que el teclado termine de subir
+            delay(500)
+            bringIntoViewRequester.bringIntoView()
+        }
+    }
+
+    // Se activará el teclado automáticamente al entrar a la pantalla
+    val focusRequester = remember { FocusRequester() }
+    val keyBoardController = LocalSoftwareKeyboardController.current
+
+    LaunchedEffect(Unit) {
+        awaitFrame()
+        focusRequester.requestFocus()
+        keyBoardController?.show()
+    }
+
     BasicTextField(
+        modifier = Modifier
+            .bringIntoViewRequester(bringIntoViewRequester)
+            .focusRequester(focusRequester),
         interactionSource = interactionSource,
         value = text,
-        onValueChange = { interpretationVM.updateExamField(it) },
+        onValueChange = { manualInterpretationVM.updateExamField(it) },
         singleLine = true,
         textStyle = TextStyle(
             color = IQuiuboColorPallete.primaryText,
@@ -248,19 +357,9 @@ import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
             Row (
                 modifier = Modifier
                     .fillMaxWidth()
-                    .drawBehind {
-                        val strokeWidth = animateWidthBorder.toPx()
-                        val y = size.height - strokeWidth / 2
-                        drawLine(
-                            color = focusedColor,
-                            start = Offset(0f, y),
-                            end = Offset(size.width, y),
-                            strokeWidth = strokeWidth
-                        )
-                    }
-                    //.border(animateWidthBorder, focusedColor, RoundedCornerShape(spacing.md))
-                    //.background(Color.White, RoundedCornerShape(spacing.md))
-                    .padding(vertical = spacing.md)
+                    //.border(animateWidthBorder, focusedColor, CircleShape)
+                    .background(Color.White, CircleShape)
+                    .padding(spacing.md)
             ) {
 
                 Icon(
@@ -299,7 +398,7 @@ import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
                         modifier = Modifier
                             .size(spacing.xl)
                             .clip(CircleShape)
-                            .clickable { interpretationVM.cleanText() }
+                            .clickable { manualInterpretationVM.cleanText() }
                     )
                 }
             }
@@ -309,39 +408,46 @@ import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
 
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable private fun ExamNamesSecondSection(
-    interpretationVM: InterpretationVM
+    manualInterpretationVM: ManualInterpretationVM
 ) {
 
     val spacing = LocalSpacing.current
-    val filteredList by interpretationVM.filteredList.collectAsStateWithLifecycle()
-    val text by interpretationVM.exam.collectAsStateWithLifecycle()
+    val filteredList by manualInterpretationVM.filteredList.collectAsStateWithLifecycle()
+    val text by manualInterpretationVM.exam.collectAsStateWithLifecycle()
 
-
-    AnimatedVisibility(
-        visible = filteredList.isNotEmpty(),
-        enter = fadeIn() + expandVertically(),
-        exit = fadeOut() + shrinkVertically()
+    LazyColumn(modifier = Modifier
+        .fillMaxWidth()
     ) {
 
-        Column {
+        filteredList.forEachIndexed { indexAlpha, alphabetBiomarker ->
 
-            Spacer(modifier = Modifier.height(spacing.md))
+            stickyHeader {
+                AlphabeticHeader(alphabetBiomarker.word)
+            }
 
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            item { Spacer(modifier = Modifier.height(spacing.md)) }
 
-                filteredList.forEachIndexed { index, bioMarker ->
+            itemsIndexed(alphabetBiomarker.biomarkerList) { index, biomarker ->
 
+                Column (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = spacing.md)
+                ) {
                     ItemBiomarkerLazyColumn(
                         index = index,
-                        lastIndex = filteredList.size - 1,
-                        onlyOne = filteredList.size == 1,
-                        bioMarker = bioMarker,
-                        interpretationVM = interpretationVM
+                        lastIndex = alphabetBiomarker.biomarkerList.size - 1,
+                        onlyOne = alphabetBiomarker.biomarkerList.size == 1,
+                        bioMarker = biomarker,
+                        manualInterpretationVM = manualInterpretationVM,
+                        indexAlphabetic = indexAlpha,
+                        list = filteredList
                     )
                 }
+
+                // AlfabeticLazyItem(manualInterpretationVM, alphabeticItem)
             }
         }
     }
@@ -349,13 +455,74 @@ import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
 
 
 
-@Composable
-fun ItemBiomarkerLazyColumn(
+@Composable private fun AlphabeticHeader(
+    word: String
+) {
+
+    val spacing = LocalSpacing.current
+
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .background(IQuiuboColorPallete.backgroundLight.copy(0.6f))
+            .padding(horizontal = spacing.md)
+            .padding(top = spacing.md),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        Text(
+            text = word,
+            fontSize = ResponsiveText.headline(),
+            lineHeight = ResponsiveLineHeight.headline(),
+            color = Color.Black,
+            fontFamily = MyFont.spaceGroteskRegular,
+            fontWeight = FontWeight.ExtraBold,
+            modifier = Modifier
+                .background(IQuiuboColorPallete.accentMiddle.copy(0.5f), CircleShape)
+                .padding(horizontal = spacing.md)
+            )
+
+        // HorizontalDivider(color = IQuiuboColorPallete.LOW_PINK)
+
+        //Spacer(modifier = Modifier.height(10.dp))
+    }
+}
+
+
+
+//@Composable private fun AlfabeticLazyItem(
+//    manualInterpretationVM: ManualInterpretationVM,
+//    list: AlphabetBiomarker,
+//) {
+//
+//    Column (
+//        horizontalAlignment = Alignment.Start
+//    ) {
+//
+//        list.biomarkerList.forEachIndexed { index, bioMarker ->
+//            ItemBiomarkerLazyColumn(
+//                index = index,
+//                lastIndex = list.biomarkerList.size - 1,
+//                onlyOne = list.biomarkerList.size == 1,
+//                bioMarker = bioMarker,
+//                manualInterpretationVM = manualInterpretationVM,
+//                list = list
+//            )
+//        }
+//    }
+//}
+
+
+
+@Composable private fun ItemBiomarkerLazyColumn(
     index: Int,
     lastIndex: Int,
     onlyOne: Boolean,
     bioMarker: BioMarkerUI,
-    interpretationVM: InterpretationVM
+    manualInterpretationVM: ManualInterpretationVM,
+    indexAlphabetic: Int,
+    list: List<AlphabetBiomarker>
 ) {
 
     val spacing = LocalSpacing.current
@@ -379,15 +546,18 @@ fun ItemBiomarkerLazyColumn(
     customBorderButton = if (onlyOne) RoundedCornerShape(topEnd = spacing.md, bottomEnd = spacing.md)
     else customBorderButton
 
-    val customColorButton = if (index % 2 != 0) IQuiuboColorPallete.LOW_PINK
-    else IQuiuboColorPallete.LOW_PINK.copy(0.6f)
+    val customColorButton = if (index % 2 != 0) IQuiuboColorPallete.accentSmooth
+    else IQuiuboColorPallete.accentSmooth.copy(0.6f)
 
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
-            .background(Color.White, customBorders)
+            .background(
+                if (!bioMarker.selected) Color.White else Color(0xFFD5FFD4).copy(alpha = 0.3f),
+                customBorders
+            )
             .drawBehind {
                 if (index != lastIndex) {
                     val strokeWidth = (1.dp).toPx()
@@ -410,7 +580,7 @@ fun ItemBiomarkerLazyColumn(
                 .width(widthColumn)
                 .padding(horizontal = spacing.md, vertical = spacing.sm)
         ) {
-            
+
             Text(
                 text = bioMarker.bioMarker.displayName,
                 fontFamily = MyFont.workSansRegular,
@@ -423,7 +593,7 @@ fun ItemBiomarkerLazyColumn(
             Text(
                 text = bioMarker.bioMarker.unit,
                 fontFamily = MyFont.workSansRegular,
-                fontSize = ResponsiveText.caption() ,
+                fontSize = ResponsiveText.caption(),
                 lineHeight = ResponsiveLineHeight.caption(),
                 color = IQuiuboColorPallete.secondaryText
             )
@@ -435,7 +605,7 @@ fun ItemBiomarkerLazyColumn(
             modifier = Modifier
                 .fillMaxHeight()
                 .width(spacing.xl),
-                //.background(customColorButton, customBorderButton),
+            //.background(customColorButton, customBorderButton),
             contentPadding = PaddingValues(0.dp),
             shape = customBorderButton,
             colors = ButtonDefaults.buttonColors(
@@ -444,27 +614,34 @@ fun ItemBiomarkerLazyColumn(
             ),
             //enabled = !bioMarker.selected,
             onClick = {
-                interpretationVM.selectBioMarker(bioMarker.bioMarker)
+                manualInterpretationVM.selectBioMarker(bioMarker.bioMarker)
                 // Una vez el user selecciona un biomarcador
                 // se limpia el texto, para que vuelva a entrar uno.
-                // interpretationVM.cleanText()
+                // manualInterpretationVM.cleanText()
             }
         ) {
 
             Icon(
                 imageVector = if (!bioMarker.selected) Icons.Default.Add else Icons.Default.Check,
                 contentDescription = "add_ic",
-                tint = if (!bioMarker.selected) IQuiuboColorPallete.moradoPrimario else Color(0xFF089400),
+                tint = if (!bioMarker.selected) Color(0xFFD4A500).copy(green = 0.5f) else Color(
+                    0xFF089400
+                ),
                 modifier = Modifier.size(spacing.lg)
             )
         }
     }
+
+    // Se utiliza para evitar que se ponga otro spacer, cuando la
+    // lista alphabeticList, ya esta en su última posición.
+    if (lastIndex == index && indexAlphabetic < list.size - 1)
+        Spacer(modifier = Modifier.height(spacing.md))
 }
 
 
 
 @Composable private fun ThirdSection(
-    interpretationVM: InterpretationVM
+    manualInterpretationVM: ManualInterpretationVM
 ) {
 
     val spacing = LocalSpacing.current
@@ -473,18 +650,18 @@ fun ItemBiomarkerLazyColumn(
         modifier = Modifier.fillMaxWidth()
     ) {
 
-        SubtitleAndIconNumber(interpretationVM)
+        SubtitleAndIconNumber(manualInterpretationVM)
 
         Spacer(modifier = Modifier.height(spacing.md))
 
-        FlowRowSelectedItemsThirdSection(interpretationVM)
+        FlowRowSelectedItemsThirdSection(manualInterpretationVM)
     }
 }
 
 
 
 @Composable private fun SubtitleAndIconNumber(
-    interpretationVM: InterpretationVM
+    manualInterpretationVM: ManualInterpretationVM
 ) {
 
     Row (
@@ -494,21 +671,21 @@ fun ItemBiomarkerLazyColumn(
         verticalAlignment = Alignment.Bottom
     ) {
 
-        SubtitleThirdSection(interpretationVM)
+        SubtitleThirdSection(manualInterpretationVM)
         
         Spacer(modifier = Modifier.weight(1f))
 
-        IconNumberThirdSection(interpretationVM)
+        IconNumberThirdSection(manualInterpretationVM)
     }
 }
 
 
 
 @Composable private fun SubtitleThirdSection(
-    interpretationVM: InterpretationVM
+    manualInterpretationVM: ManualInterpretationVM
 ) {
 
-    val selectedExamList by interpretationVM.selectedExams.collectAsStateWithLifecycle()
+    val selectedExamList by manualInterpretationVM.selectedExams.collectAsStateWithLifecycle()
     val size = selectedExamList.size
 
     Row (
@@ -528,10 +705,10 @@ fun ItemBiomarkerLazyColumn(
 
 
 @Composable private fun IconNumberThirdSection(
-    interpretationVM: InterpretationVM
+    manualInterpretationVM: ManualInterpretationVM
 ) {
 
-    val selectedExamList by interpretationVM.selectedExams.collectAsStateWithLifecycle()
+    val selectedExamList by manualInterpretationVM.selectedExams.collectAsStateWithLifecycle()
     val size = selectedExamList.size
     val spacing = LocalSpacing.current
 
@@ -556,11 +733,11 @@ fun ItemBiomarkerLazyColumn(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable private fun FlowRowSelectedItemsThirdSection(
-    interpretationVM: InterpretationVM
+    manualInterpretationVM: ManualInterpretationVM
 ) {
 
     val spacing = LocalSpacing.current
-    val selectedList by interpretationVM.selectedExams.collectAsStateWithLifecycle()
+    val selectedList by manualInterpretationVM.selectedExams.collectAsStateWithLifecycle()
 
     FlowRow (
         verticalArrangement = Arrangement.spacedBy(spacing.sm),
@@ -568,24 +745,27 @@ fun ItemBiomarkerLazyColumn(
     ) {
     
         selectedList.forEach {
-            ItemFlowRowThirdSection(it, interpretationVM)
+            ItemFlowRowThirdSection(it, manualInterpretationVM)
         }
     }
+
+    if (selectedList.isNotEmpty())
+        Spacer(Modifier.height(spacing.md))
 }
 
 
 
 @Composable private fun ItemFlowRowThirdSection(
     bioMarker: BioMarkerUI,
-    interpretationVM: InterpretationVM
+    manualInterpretationVM: ManualInterpretationVM
 ) {
 
     val spacing = LocalSpacing.current
 
     Row (
         modifier = Modifier
-            .dashedBorder(1.dp, IQuiuboColorPallete.LOW_PINK)
-            .background(IQuiuboColorPallete.LOW_PINK.copy(0.3f), RoundedCornerShape(10.dp))
+            .dashedBorder(1.dp, IQuiuboColorPallete.accentMiddle)
+            .background(IQuiuboColorPallete.accentSmooth, RoundedCornerShape(10.dp))
             .padding(horizontal = spacing.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -605,7 +785,7 @@ fun ItemBiomarkerLazyColumn(
             modifier = Modifier
                 .size(spacing.md)
                 .clip(CircleShape)
-                .clickable { interpretationVM.selectBioMarker(bioMarker.bioMarker) },
+                .clickable { manualInterpretationVM.selectBioMarker(bioMarker.bioMarker) },
             tint = Color.Black
         )
     }

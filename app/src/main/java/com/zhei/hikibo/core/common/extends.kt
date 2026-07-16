@@ -3,6 +3,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import com.google.firebase.Timestamp
+import java.text.Normalizer
 import java.time.Instant
 import java.time.LocalDate
 import java.time.Period
@@ -61,3 +62,10 @@ fun String.parseToLocalDate(): LocalDate =
  * */
 fun LocalDate.calculateAge(today: LocalDate = LocalDate.now()): Int =
     Period.between(this, today).years
+
+
+
+fun String.normalizeForSort(): String {
+    return Normalizer.normalize(this, Normalizer.Form.NFD)
+        .replace("\\p{M}".toRegex(), "")
+}

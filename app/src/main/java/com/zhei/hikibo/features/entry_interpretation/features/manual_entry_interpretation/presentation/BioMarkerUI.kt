@@ -1,4 +1,4 @@
-package com.zhei.hikibo.features.manual_entry_interpretation.presentation
+package com.zhei.hikibo.features.entry_interpretation.features.manual_entry_interpretation.presentation
 import com.zhei.hikibo.core.domain.model.BioMarker
 
 

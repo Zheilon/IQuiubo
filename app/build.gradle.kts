@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-    namespace = "com.zhei.hikibo"
+    namespace = "com.zhei.iquiubo"
     compileSdk = 35
 
     defaultConfig {
@@ -23,9 +23,9 @@ android {
         val minor = 3
 
         // Correcciones bugs o ajustes menores.
-        val patch = 0
+        val patch = 1
 
-        applicationId = "com.zhei.hikibo"
+        applicationId = "com.zhei.iquiubo"
         minSdk = 27
         targetSdk = 35
         versionCode = mayor * 10000 + minor * 100 + patch // 1.0.0 = 10000

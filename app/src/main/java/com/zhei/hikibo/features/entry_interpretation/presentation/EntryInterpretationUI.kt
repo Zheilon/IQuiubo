@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -94,8 +95,9 @@ import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(IQuiuboColorPallete.moradoPrimario)
+            .background(IQuiuboColorPallete.accentMiddle)
             .padding(spacing.lg)
+            .statusBarsPadding()
     ) {
 
         TitleFirstSection()
@@ -113,7 +115,7 @@ import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
         fontFamily = MyFont.jakartaSansRegular,
         fontSize = ResponsiveText.headline(),
         lineHeight = ResponsiveLineHeight.headline(),
-        color = Color.White,
+        color = IQuiuboColorPallete.primaryText,
         fontWeight = FontWeight.Bold
     )
 }
@@ -127,7 +129,7 @@ import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
         fontFamily = MyFont.jakartaSansRegular,
         fontSize = ResponsiveText.caption(),
         lineHeight = ResponsiveLineHeight.caption(),
-        color = IQuiuboColorPallete.backgroundLight,
+        color = IQuiuboColorPallete.secondaryText,
     )
 }
 

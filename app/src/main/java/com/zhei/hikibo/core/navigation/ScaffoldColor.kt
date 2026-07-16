@@ -14,7 +14,7 @@ import com.zhei.hikibo.ui.theme.IQuiuboColorPallete
     val current = nav.currentBackStackEntryAsState().value?.destination
 
     return when {
-        current?.hasRoute(Scenes.HomeScene::class) == true -> IQuiuboColorPallete.backgroundLight
+        current?.hasRoute(Scenes.HomeScene::class) == true -> IQuiuboColorPallete.moradoPrimario
         current?.hasRoute(Scenes.InterpretationScenes.Entry::class) == true -> IQuiuboColorPallete.moradoPrimario
         current?.hasRoute(Scenes.InterpretationScenes.Manual::class) == true -> IQuiuboColorPallete.moradoPrimario
         else -> Color.Yellow
