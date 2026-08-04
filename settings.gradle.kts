@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Hikibo"
+rootProject.name = "IQuiubo"
 include(":app")
  
