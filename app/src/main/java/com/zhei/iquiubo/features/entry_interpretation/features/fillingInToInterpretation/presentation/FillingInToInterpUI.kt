@@ -1,4 +1,4 @@
-package com.zhei.iquiubo.features.entry_interpretation.features.manual_entry_interpretation.features.fillingInToInterpretation.presentation
+package com.zhei.iquiubo.features.entry_interpretation.features.fillingInToInterpretation.presentation
 import android.content.pm.ActivityInfo
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -160,7 +160,7 @@ import kotlinx.coroutines.delay
 
     Column(
         modifier = Modifier
-            .background(IQuiuboColorPallete.accentMiddle)
+            .background(IQuiuboColorPallete.moradoPrimario)
             .padding(spacing.lg)
             .statusBarsPadding()
 
@@ -180,6 +180,8 @@ import kotlinx.coroutines.delay
         Spacer(modifier = Modifier.height(spacing.sm))
 
         LinearChargeComplete(fillingInToInterpVM)
+
+        Spacer(modifier = Modifier.height(spacing.sm))
 
         ButtonToNavigate(fillingInToInterpVM)
     }
@@ -203,7 +205,8 @@ import kotlinx.coroutines.delay
                 fillingInToInterpVM.onButtonToNav(
                     Scenes.InterpretationScenes.Manual
                 )
-            }
+            },
+        tint = Color.White
     )
 }
 
@@ -223,10 +226,10 @@ import kotlinx.coroutines.delay
 
         Text(
             text = "Ingresa tus valores",
-            fontSize = ResponsiveText.headline(),
-            lineHeight = ResponsiveLineHeight.headline(),
+            fontSize = ResponsiveText.displaymiddle(),
+            lineHeight = ResponsiveLineHeight.displayMiddle(),
             fontFamily = MyFont.workSansRegular,
-            color = IQuiuboColorPallete.primaryText,
+            color = Color.White,
             fontWeight = FontWeight.SemiBold
         )
 
@@ -234,8 +237,8 @@ import kotlinx.coroutines.delay
             text = "Escribe el resultado de cada examen tal como aparece",
             fontSize = ResponsiveText.caption(),
             lineHeight = ResponsiveLineHeight.caption(),
-            fontFamily = MyFont.jakartaSansRegular,
-            color = IQuiuboColorPallete.primaryText,
+            fontFamily = MyFont.workSansRegular,
+            color = Color.White,
         )
     }
 }
@@ -250,7 +253,8 @@ import kotlinx.coroutines.delay
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.spacedBy(spacing.sm)
     ) {
 
         // Canva line
@@ -258,8 +262,6 @@ import kotlinx.coroutines.delay
             fillingInToInterpVM = fillingInToInterpVM,
             modifier = Modifier.weight(1f)
         )
-
-        Spacer(modifier = Modifier.width(spacing.md))
 
         // Text
         DescribeMissingData(fillingInToInterpVM)
@@ -293,7 +295,7 @@ import kotlinx.coroutines.delay
 
         // Line de fondo sin relleno progresivo.
         drawRoundRect(
-            color = IQuiuboColorPallete.backgroundLight,
+            color = Color.White,
             size = size,
             cornerRadius = CornerRadius(50f)
         )
@@ -320,8 +322,11 @@ import kotlinx.coroutines.delay
         text = "${missingExams.first} de ${selectedExams.size}",
         fontSize = ResponsiveText.body(), 
         lineHeight = ResponsiveLineHeight.body(), 
-        fontFamily = MyFont.spaceGroteskRegular, 
-        color = Color.Black
+        fontFamily = MyFont.spaceGroteskRegular,
+        color = Color.Black,
+        modifier = Modifier
+            .background(IQuiuboColorPallete.backgroundLight, RoundedCornerShape(10.dp))
+            .padding(horizontal = LocalSpacing.current.sm)
     )
 }
 
@@ -373,11 +378,15 @@ import kotlinx.coroutines.delay
                 modifier = Modifier
                     .fillMaxWidth()
                     .scale(scale),
-                shape = CircleShape,
+                shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.White
                 ),
-                onClick = {  }
+                onClick = {
+                    fillingInToInterpVM.onButtonToSendPrompt(
+                        Scenes.InterpretationScenes.PriorityResults
+                    )
+                }
             ) {
 
                 Text(
@@ -592,7 +601,7 @@ import kotlinx.coroutines.delay
     Box(
         modifier = Modifier
             .size(spacing.xxl)
-            .background(IQuiuboColorPallete.accentSmooth, RoundedCornerShape(spacing.sm)),
+            .background(IQuiuboColorPallete.moradoPrimario, CircleShape),
         contentAlignment = Alignment.Center
     ) {
 
@@ -600,7 +609,7 @@ import kotlinx.coroutines.delay
             imageVector = biomarker.icon,
             contentDescription = "bio_icon",
             modifier = Modifier.fillMaxSize(0.55f),
-            tint = IQuiuboColorPallete.accentMiddle.copy(green = 0.5f)
+            tint = Color.White
         )
     }
 }

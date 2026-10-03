@@ -39,6 +39,9 @@ sealed class Scenes {
         data object Filling: InterpretationScenes()
 
         @Serializable
+        data object PriorityResults: InterpretationScenes()
+
+        @Serializable
         data object Scanner: InterpretationScenes()
     }
 

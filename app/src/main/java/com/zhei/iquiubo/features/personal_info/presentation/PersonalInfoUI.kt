@@ -9,6 +9,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -124,7 +125,7 @@ import kotlinx.coroutines.delay
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = spacing.xl)
+                .padding(horizontal = spacing.xl, vertical = spacing.md)
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .imePadding()
@@ -139,7 +140,7 @@ import kotlinx.coroutines.delay
                 modifier = Modifier
                     .weight(1f)
                     .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.Bottom
+                verticalArrangement = Arrangement.Top
             ) {
 
                 TitleFirst()
@@ -163,8 +164,6 @@ import kotlinx.coroutines.delay
                 Spacer(modifier = Modifier.height(spacing.lg))
 
                 TypeSexArea(personalInfoVM)
-
-                Spacer(modifier = Modifier.height(spacing.xs))
             }
 
             // BOTÓN FIJO: fuera del weight → nunca se comprime
@@ -455,12 +454,12 @@ fun BirthDayTextFieldsArea(
                 text = it,
                 fontSize = ResponsiveText.caption(),
                 lineHeight = ResponsiveLineHeight.caption(),
-                fontFamily = MyFont.jakartaSansRegular,
-                color = Color(0xFF7E22CE),
-                fontWeight = FontWeight.SemiBold,
+                fontFamily = MyFont.workSansRegular,
+                color = if (isError) Color(0xFFD64545) else IQuiuboColorPallete.moradoPrimario,
+                fontWeight = if (isFocused) FontWeight.Bold else FontWeight.Normal,
                 modifier = Modifier
-                    .background(color = Color(0xFFFFFFFF), RoundedCornerShape(20.dp))
-                    .padding(start = spacing.sm, end = spacing.lg, bottom = spacing.xs)
+                    .background(color = Color(0xFFFFFFFF), RoundedCornerShape(5.dp))
+                    .padding(start = spacing.sm, end = spacing.md, bottom = spacing.xs)
             )
 
             Spacer(modifier = Modifier.height(5.dp))
@@ -552,20 +551,20 @@ fun BirthDayTextFieldsArea(
             }
         )
 
-        LaunchedEffect(isError) {
-            if (isError)
-                bringIntoViewRequester.bringIntoView()
-        }
-
         // 👇 Mensaje de error que APARECE animado
         AnimatedVisibility(visible = isError && errorMessage != null) {
+
+            LaunchedEffect(Unit) {
+                bringIntoViewRequester.bringIntoView()
+            }
+
             Text(
                 text = errorMessage ?: "",
                 color = Color(0xFFD64545),
-                fontSize = ResponsiveText.body(),
-                lineHeight = ResponsiveLineHeight.body(),
+                fontSize = ResponsiveText.caption(),
+                lineHeight = ResponsiveLineHeight.caption(),
                 modifier = Modifier.padding(top = 4.dp),
-                fontFamily = MyFont.spaceGroteskRegular
+                fontFamily = MyFont.workSansRegular
             )
         }
     }
@@ -577,6 +576,7 @@ fun BirthDayTextFieldsArea(
     personalInfoVM: PersonalInfoVM
 ) {
 
+    val uistate by personalInfoVM.personalInfoUiState.collectAsStateWithLifecycle()
     val spacing = LocalSpacing.current
     
     Row(
@@ -589,7 +589,7 @@ fun BirthDayTextFieldsArea(
             fontSize = ResponsiveText.caption(),
             lineHeight = ResponsiveLineHeight.caption(),
             fontFamily = MyFont.jakartaSansRegular,
-            color = Color(0xFF7E22CE),
+            color = if (uistate is PersonalInfoUiState.SexError) Color(0xFFD64545) else IQuiuboColorPallete.moradoPrimario,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier
                 .background(color = Color.White, RoundedCornerShape(20.dp))
@@ -692,9 +692,9 @@ private fun SelectBoxSexArea(
             Text(
                 text = s.message,
                 color = Color(0xFFD64545),
-                fontSize = ResponsiveText.body(),
-                lineHeight = ResponsiveLineHeight.body(),
-                fontFamily = MyFont.spaceGroteskRegular,
+                fontSize = ResponsiveText.caption(),
+                lineHeight = ResponsiveLineHeight.caption(),
+                fontFamily = MyFont.workSansRegular,
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Start
             )

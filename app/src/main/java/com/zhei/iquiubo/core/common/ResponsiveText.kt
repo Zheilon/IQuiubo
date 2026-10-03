@@ -77,7 +77,7 @@ object ResponsiveText {
 
 
     @Composable fun small(): TextUnit =
-        if (isSmallDevice()) 7.sp else 9.sp
+        if (isSmallDevice()) 8.sp else 10.sp
 
 
     /**

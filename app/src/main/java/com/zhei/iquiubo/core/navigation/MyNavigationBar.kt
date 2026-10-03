@@ -2,6 +2,7 @@ package com.zhei.iquiubo.core.navigation
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -15,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -23,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -59,8 +62,9 @@ import com.zhei.iquiubo.ui.theme.IQuiuboColorPallete
         modifier = Modifier
             .onGloballyPositioned {
                 navBarHeight = with(density) { (it.size.height.toDp()) }
-           },
-        containerColor = IQuiuboColorPallete.backgroundLight,
+           }
+            .clip(RoundedCornerShape(spacing.xl)),
+        containerColor = Color(0xFF6B21A8).copy(alpha = 0.8f),
     ) {
 
         val currentDestination = nav.currentBackStackEntryAsState().value?.destination
@@ -93,17 +97,17 @@ import com.zhei.iquiubo.ui.theme.IQuiuboColorPallete
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedTextColor = labelColor(screen),
-                    unselectedTextColor = Color.Black,
-                    selectedIconColor = iconColor(screen, isSelected),
-                    unselectedIconColor = iconColor(screen, isSelected),
-                    indicatorColor = indicatorColor(screen)
+                    selectedTextColor = Color.White,
+                    unselectedTextColor = Color.White,
+                    selectedIconColor = Color.Black,
+                    unselectedIconColor = Color.White,
+                    indicatorColor = IQuiuboColorPallete.backgroundLight
                 ),
                 label = {
                     Text(
                         text = screen.title,
-                        fontSize = ResponsiveText.small(),
-                        lineHeight = ResponsiveLineHeight.small(),
+                        fontSize = 8.sp,
+                        lineHeight = ResponsiveLineHeight.minimal(),
                         fontFamily = MyFont.workSansRegular,
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
@@ -116,9 +120,7 @@ import com.zhei.iquiubo.ui.theme.IQuiuboColorPallete
         }
     }
 
-    LaunchedEffect(navBarHeight) {
-        onPaddingBotton(navBarHeight)
-    }
+    LaunchedEffect(navBarHeight) { onPaddingBotton(navBarHeight) }
 }
 
 

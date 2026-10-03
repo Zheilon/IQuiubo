@@ -63,13 +63,13 @@ import kotlinx.coroutines.delay
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(IQuiuboColorPallete.accentMiddle),
+            .background(IQuiuboColorPallete.moradoPrimario),
         verticalArrangement = Arrangement.Bottom
     ) {
 
         Column(
             modifier = Modifier
-                .background(IQuiuboColorPallete.accentMiddle)
+                .background(IQuiuboColorPallete.backgroundLight)
                 .padding(spacing.lg)
         ) {
 

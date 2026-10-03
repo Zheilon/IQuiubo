@@ -42,9 +42,7 @@ class HomeVM @Inject constructor(
         val id = userId() ?: throw IllegalStateException("Sin sesion")
         emitAll(
             observeUser(id).map { user ->
-
                 _user.value = user
-
                 if (user == null) HomeUiState.Loading
                 else HomeUiState.Success(user)
             }

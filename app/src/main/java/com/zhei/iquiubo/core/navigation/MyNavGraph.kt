@@ -1,12 +1,16 @@
 package com.zhei.iquiubo.core.navigation
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,14 +19,15 @@ import androidx.navigation.compose.rememberNavController
 import com.zhei.iquiubo.core.presentation.AppViewModel
 import com.zhei.iquiubo.core.presentation.CoordinatorFlowSceneVM
 import com.zhei.iquiubo.core.presentation.StateSceneVM
-import com.zhei.iquiubo.features.entry_interpretation.features.manual_entry_interpretation.features.fillingInToInterpretation.presentation.FillingInToInterpUI
-import com.zhei.iquiubo.features.entry_interpretation.features.manual_entry_interpretation.features.fillingInToInterpretation.presentation.FillingInToInterpVM
+import com.zhei.iquiubo.features.entry_interpretation.features.fillingInToInterpretation.presentation.FillingInToInterpUI
+import com.zhei.iquiubo.features.entry_interpretation.features.fillingInToInterpretation.presentation.FillingInToInterpVM
 import com.zhei.iquiubo.features.entry_interpretation.presentation.EntryInterpretationUI
-import com.zhei.iquiubo.features.home.presentation.HomeUI
 import com.zhei.iquiubo.features.home.presentation.HomeVM
 import com.zhei.iquiubo.features.entry_interpretation.features.manual_entry_interpretation.presentation.ManualInterpretationUI
 import com.zhei.iquiubo.features.entry_interpretation.features.manual_entry_interpretation.presentation.ManualInterpretationVM
-
+import com.zhei.iquiubo.features.entry_interpretation.features.show_priority_results.presentation.PriorityResultsUI
+import com.zhei.iquiubo.features.home.presentation.HomeUIV2
+import com.zhei.iquiubo.features.monitoring.presentation.MonitoringUI
 
 
 @Composable fun MyNavGraph(
@@ -61,7 +66,12 @@ import com.zhei.iquiubo.features.entry_interpretation.features.manual_entry_inte
     coordinatorFlowSceneVM: CoordinatorFlowSceneVM
 ) {
 
-    AppNavBar(nav) {
+    var heightNavBar by remember { mutableStateOf(0.dp) }
+
+    AppNavBar(
+        nav = nav,
+        heightNavBar = { heightNavBar = it }
+    ) {
         NavHost(
             navController = nav,
             startDestination = Scenes.HomeScene,
@@ -106,7 +116,7 @@ import com.zhei.iquiubo.features.entry_interpretation.features.manual_entry_inte
         ) {
 
             composable<Scenes.HomeScene> {
-                HomeUI(homeVM)
+                HomeUIV2(heightNavBar, homeVM)
             }
 
 
@@ -163,11 +173,17 @@ import com.zhei.iquiubo.features.entry_interpretation.features.manual_entry_inte
                     )
                 }
 
+                composable<Scenes.InterpretationScenes.PriorityResults> {
+                    PriorityResultsUI(
+                        fillingInToInterpVM = fillingInToInterpVM
+                    )
+                }
+
             }
 
 
             composable<Scenes.MonitoringScene> {
-                Text("hola seguimiento")
+                MonitoringUI()
             }
 
 

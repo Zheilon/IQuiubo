@@ -287,7 +287,5 @@ class PersonalInfoVM @Inject constructor(
                 updatePersonalInfoUiState(PersonalInfoUiState.OnButtonSendError(msg))
             }
         }
-
-
     }
 }

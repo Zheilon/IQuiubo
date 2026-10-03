@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import java.time.YearMonth
 
-object Constants {
+object  Constants {
 
     val DEVICE_TOP_PADDING: @Composable () -> Dp = {
         WindowInsets.systemBars.asPaddingValues().calculateTopPadding()

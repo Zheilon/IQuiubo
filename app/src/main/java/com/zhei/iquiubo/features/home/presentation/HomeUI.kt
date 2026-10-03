@@ -784,9 +784,10 @@ import kotlin.math.sin
     Column (
         modifier = Modifier
             // Esta es una función extend que yo diseñe!
-            //.dashedBorder(1.dp, Color.Black)
-            //.background(Color.Red, RoundedCornerShape(15.dp))
-            .padding(horizontal = spacing.md, vertical = spacing.sm),
+            //.dashedBorder(1.dp, risk.color.copy(0.7f), spacing.md)
+            .shadow(2.dp, RoundedCornerShape(spacing.md))
+            .background(Color.White, RoundedCornerShape(spacing.md))
+            .padding(horizontal = spacing.md, vertical = spacing.md),
     ) {
 
         IconMoreTextInItem(examName)
@@ -815,8 +816,9 @@ import kotlin.math.sin
             text = examName,
             fontSize = ResponsiveText.caption(),
             lineHeight = ResponsiveLineHeight.caption(),
-            color = IQuiuboColorPallete.secondaryText,
-            fontFamily = MyFont.spaceGroteskRegular
+            color = IQuiuboColorPallete.primaryText,
+            fontFamily = MyFont.spaceGroteskRegular,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -877,19 +879,19 @@ import kotlin.math.sin
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        //Box(
-        //    modifier = Modifier
-        //        .size(spacing.md)
-        //        .background(backgroundLabel, CircleShape)
-        //) {}
+        Box(
+            modifier = Modifier
+                .size(spacing.sm)
+                .background(backgroundLabel, RoundedCornerShape(spacing.sm))
+        ) {}
 
-        //Spacer(modifier = Modifier.width(spacing.sm))
+        Spacer(modifier = Modifier.width(spacing.sm))
 
         Text(
             text = label,
             fontSize = ResponsiveText.small(),
             lineHeight = ResponsiveLineHeight.small(),
-            color = Color.Black,
+            color = IQuiuboColorPallete.primaryText,
             fontFamily = MyFont.spaceGroteskRegular
         )
     }
@@ -925,6 +927,12 @@ import kotlin.math.sin
 
         val radius = barHeight / 2
 
+        //--------------------------------------------------
+        // Posición exacta del indicador
+        //--------------------------------------------------
+
+        val x = (progress.toFloat()).coerceIn(0.018f, 0.9825f) * size.width
+
 
 
         //--------------------------------------------------
@@ -940,7 +948,7 @@ import kotlin.math.sin
             val lineColor = RiskGradient.getColorFractionByGradientList(fraction.toDouble(), gradientList)
 
             drawLine(
-                color = Color.Black,
+                color = lineColor,
                 start = Offset(markerX, barTop + 10.dp.toPx()),
                 end = Offset(markerX, barTop + barHeight - spacing.sm.toPx()),
                 strokeWidth = 1.dp.toPx(),
@@ -949,32 +957,14 @@ import kotlin.math.sin
         }
 
         //--------------------------------------------------
-        // Barra
-        //--------------------------------------------------
-
-
-        drawRoundRect(
-            brush = Brush.horizontalGradient(gradientList),
-            topLeft = Offset(0f, spacing.sm.toPx()), // Este ultimo cuadra la altura
-            size = Size(size.width, barHeight),
-            cornerRadius = CornerRadius(radius)
-        )
-
-        //--------------------------------------------------
-        // Posición exacta del indicador
-        //--------------------------------------------------
-
-        val x = (progress.toFloat()).coerceIn(0.018f, 0.9825f) * size.width
-
-        //--------------------------------------------------
         // Línea indicadora
         //--------------------------------------------------
 
         val lineIntoBar = spacing.sm.toPx()      // Cuánto entra dentro de la barra
-        val lineBelowBar = 1.dp.toPx()     // Cuánto sale debajo de la barra
+        val lineBelowBar = 1.dp.toPx()          // Cuánto sale debajo de la barra
 
         drawLine(
-            color = indicatorColor,
+            color = IQuiuboColorPallete.moradoPrimario,
             start = Offset(
                 x = x,
                 y = barTop + barHeight - lineIntoBar
@@ -983,8 +973,19 @@ import kotlin.math.sin
                 x = x,
                 y = barTop + barHeight + lineBelowBar
             ),
-            strokeWidth = 2.dp.toPx(),
+            strokeWidth = 1.dp.toPx(),
             cap = StrokeCap.Round
+        )
+
+        //--------------------------------------------------
+        // Barra
+        //--------------------------------------------------
+
+        drawRoundRect(
+            brush = Brush.horizontalGradient(gradientList),
+            topLeft = Offset(0f, spacing.sm.toPx()), // Este ultimo cuadra la altura
+            size = Size(size.width, barHeight),
+            cornerRadius = CornerRadius(radius)
         )
 
         //--------------------------------------------------
@@ -1012,7 +1013,7 @@ import kotlin.math.sin
 
         drawPath(
             path = path,
-            color = indicatorColor
+            color = IQuiuboColorPallete.moradoPrimario
         )
     }
 }

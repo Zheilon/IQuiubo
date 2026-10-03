@@ -25,45 +25,49 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.zhei.iquiubo.core.common.locals.LocalSpacing
 import com.zhei.iquiubo.core.presentation.CoordinatorFlowSceneVM
 import com.zhei.iquiubo.ui.theme.IQuiuboColorPallete
 
 
 @Composable fun AppNavBar(
     nav: NavHostController,
+    heightNavBar: (Dp) -> Unit,
     navHost: @Composable () -> Unit
 ) {
 
-    var heightPaddingBar by remember { mutableStateOf(0.dp) }
-
+    val spacing = LocalSpacing.current
     val toShow = toShow(nav)
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(backgroudColor(nav)),
-        contentAlignment = Alignment.BottomCenter
+            .background(backgroudColor(nav))
     ) {
 
-        Column (
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = if (toShow) heightPaddingBar else 0.dp)
-        ) {
-
-            navHost()
-        }
+        navHost()
 
         if (toShow) {
-            MyNavigationBar(
-                nav = nav,
-                onPaddingBotton = { heightPaddingBar = it }
-            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = spacing.md)
+                    .navigationBarsPadding(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+
+                MyNavigationBar(
+                    nav = nav,
+                    onPaddingBotton = { heightNavBar(it) }
+                )
+            }
         }
 
     }
@@ -74,14 +78,20 @@ import com.zhei.iquiubo.ui.theme.IQuiuboColorPallete
 private fun backgroudColor(nav: NavHostController): Color {
     val current = nav.currentBackStackEntryAsState().value?.destination
     return when {
-        current?.hasRoute(Scenes.HomeScene::class) == true -> IQuiuboColorPallete.moradoPrimario
+        current?.hasRoute(Scenes.HomeScene::class) == true ->
+            IQuiuboColorPallete.moradoPrimario
 
-        current?.hasRoute(Scenes.InterpretationScenes.Entry::class) == true -> IQuiuboColorPallete.accentMiddle
-        current?.hasRoute(Scenes.InterpretationScenes.Manual::class) == true -> IQuiuboColorPallete.accentMiddle
+        current?.hasRoute(Scenes.InterpretationScenes.Entry::class) == true ->
+            IQuiuboColorPallete.accentMiddle
 
-        current?.hasRoute(Scenes.MonitoringScene::class) == true -> Color(0xFF2E7D32)
+        current?.hasRoute(Scenes.InterpretationScenes.Manual::class) == true ->
+            IQuiuboColorPallete.accentMiddle
 
-        current?.hasRoute(Scenes.ProfileScene::class) == true -> Color(0xFF2196F3)
+        current?.hasRoute(Scenes.MonitoringScene::class) == true ->
+            Color.White
+
+        current?.hasRoute(Scenes.ProfileScene::class) == true ->
+            Color(0xFF2196F3)
         else -> Color.White
     }
 }

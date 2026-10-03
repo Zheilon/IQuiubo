@@ -82,8 +82,8 @@ object RiskThreshold {
         val elevateMax: Float,
         val highMin: Float,
         val highMax: Float,
-        val direction: RiskDirection = RiskDirection.DEFAULT,
-        val literature: RiskLiterature = RiskLiterature.Default
+        val direction: RiskDirection,
+        val literature: RiskLiterature
     ) {
 
         GlucoseFasting(
@@ -132,18 +132,6 @@ object RiskThreshold {
             highMax = 300f,
             direction = RiskDirection.HIGHER_IS_WORSE,
             literature = RiskLiterature.LDL
-        ),
-
-        HDL(
-            keyName = BioMarker.HDL.displayName,
-            normalMin = 60f,
-            normalMax = 100f,
-            elevateMin = 40f,
-            elevateMax = 59f,
-            highMin = 0f,
-            highMax = 39f,
-            direction = RiskDirection.LOWER_IS_WORSE,
-            literature = RiskLiterature.HDL
         ),
 
         TotalCholesterol(
@@ -465,7 +453,9 @@ object RiskThreshold {
             elevateMin = 4.1f,
             elevateMax = 10f,
             highMin = 10.1f,
-            highMax = 100f
+            highMax = 100f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.TSH
         ),
 
         T3(
@@ -475,7 +465,9 @@ object RiskThreshold {
             elevateMin = 201f,
             elevateMax = 250f,
             highMin = 251f,
-            highMax = 500f
+            highMax = 500f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.T3
         ),
 
         FreeT3(
@@ -485,7 +477,9 @@ object RiskThreshold {
             elevateMin = 4.3f,
             elevateMax = 6f,
             highMin = 6.1f,
-            highMax = 15f
+            highMax = 15f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.FreeT3
         ),
 
         T4(
@@ -495,7 +489,9 @@ object RiskThreshold {
             elevateMin = 12.1f,
             elevateMax = 15f,
             highMin = 15.1f,
-            highMax = 25f
+            highMax = 25f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.T4
         ),
 
         FreeT4(
@@ -505,7 +501,9 @@ object RiskThreshold {
             elevateMin = 1.81f,
             elevateMax = 2.5f,
             highMin = 2.51f,
-            highMax = 5f
+            highMax = 5f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.FreeT4
         ),
 
         VitaminD(
@@ -515,7 +513,9 @@ object RiskThreshold {
             elevateMin = 101f,
             elevateMax = 150f,
             highMin = 151f,
-            highMax = 300f
+            highMax = 300f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.VitaminD
         ),
 
         VitaminB12(
@@ -525,7 +525,9 @@ object RiskThreshold {
             elevateMin = 901f,
             elevateMax = 1500f,
             highMin = 1501f,
-            highMax = 4000f
+            highMax = 4000f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.VitaminB12
         ),
 
         FolicAcid(
@@ -535,7 +537,9 @@ object RiskThreshold {
             elevateMin = 20.1f,
             elevateMax = 30f,
             highMin = 30.1f,
-            highMax = 60f
+            highMax = 60f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.FolicAcid
         ),
 
         Insulin(
@@ -545,7 +549,9 @@ object RiskThreshold {
             elevateMin = 26f,
             elevateMax = 40f,
             highMin = 41f,
-            highMax = 150f
+            highMax = 150f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.Insulin
         ),
 
         CPeptide(
@@ -555,7 +561,9 @@ object RiskThreshold {
             elevateMin = 3.2f,
             elevateMax = 5.0f,
             highMin = 5.1f,
-            highMax = 15f
+            highMax = 15f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.CPeptide
         ),
 
         Cortisol(
@@ -565,7 +573,9 @@ object RiskThreshold {
             elevateMin = 25.1f,
             elevateMax = 35f,
             highMin = 35.1f,
-            highMax = 80f
+            highMax = 80f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.Cortisol
         ),
 
         PT(
@@ -575,7 +585,9 @@ object RiskThreshold {
             elevateMin = 13.6f,
             elevateMax = 18f,
             highMin = 18.1f,
-            highMax = 60f
+            highMax = 60f,
+            direction = RiskDirection.HIGHER_IS_WORSE,
+            literature = RiskLiterature.PT
         ),
 
         INR(
@@ -585,7 +597,9 @@ object RiskThreshold {
             elevateMin = 1.21f,
             elevateMax = 2f,
             highMin = 2.01f,
-            highMax = 10f
+            highMax = 10f,
+            direction = RiskDirection.HIGHER_IS_WORSE,
+            literature = RiskLiterature.INR
         ),
 
         APTT(
@@ -595,7 +609,21 @@ object RiskThreshold {
             elevateMin = 35.1f,
             elevateMax = 45f,
             highMin = 45.1f,
-            highMax = 120f
+            highMax = 120f,
+            direction = RiskDirection.HIGHER_IS_WORSE,
+            literature = RiskLiterature.APTT
+        ),
+
+        BMI(
+            keyName = BioMarker.BMI.displayName,
+            normalMin = 18.5f,
+            normalMax = 24.9f,
+            elevateMin = 25.0f,
+            elevateMax = 29.9f,
+            highMin = 30.0f,
+            highMax = 50.0f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.BMI
         )
     }
 
@@ -608,9 +636,22 @@ object RiskThreshold {
         val elevateMax: Float,
         val highMin: Float,
         val highMax: Float,
-        val direction: RiskDirection = RiskDirection.DEFAULT,
-        val literature: RiskLiterature = RiskLiterature.Default
+        val direction: RiskDirection,
+        val literature: RiskLiterature
     ) {
+
+        HDL(
+            keyName = BioMarker.HDL.displayName,
+            highMin = 0f,
+            highMax = 39f,
+            elevateMin = 40f,
+            elevateMax = 59f,
+            normalMin = 60f,
+            normalMax = 100f,
+            direction = RiskDirection.LOWER_IS_WORSE,
+            literature = RiskLiterature.HDL
+        ),
+
 
         Creatinine(
             keyName = BioMarker.CREATININE.displayName,
@@ -619,7 +660,9 @@ object RiskThreshold {
             elevateMin = 1.36f,
             elevateMax = 1.99f,
             highMin = 2.0f,
-            highMax = 15.0f
+            highMax = 15.0f,
+            direction = RiskDirection.HIGHER_IS_WORSE,
+            literature = RiskLiterature.Creatinine
         ),
 
         UricAcid(
@@ -629,7 +672,9 @@ object RiskThreshold {
             elevateMin = 7.3f,
             elevateMax = 8.9f,
             highMin = 9.0f,
-            highMax = 20.0f
+            highMax = 20.0f,
+            direction = RiskDirection.HIGHER_IS_WORSE,
+            literature = RiskLiterature.UricAcid
         ),
 
         GGT(
@@ -639,7 +684,9 @@ object RiskThreshold {
             elevateMin = 62f,
             elevateMax = 180f,
             highMin = 181f,
-            highMax = 1500f
+            highMax = 1500f,
+            direction = RiskDirection.HIGHER_IS_WORSE,
+            literature = RiskLiterature.GGT
         ),
 
         Hemoglobin(
@@ -649,7 +696,9 @@ object RiskThreshold {
             elevateMin = 17.6f,
             elevateMax = 18.9f,
             highMin = 19.0f,
-            highMax = 25.0f
+            highMax = 25.0f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.Hemoglobin
         ),
 
         Hematocrit(
@@ -659,7 +708,9 @@ object RiskThreshold {
             elevateMin = 54.0f,
             elevateMax = 59.0f,
             highMin = 60.0f,
-            highMax = 75.0f
+            highMax = 75.0f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.Hematocrit
         ),
 
         Erythrocytes(
@@ -669,7 +720,9 @@ object RiskThreshold {
             elevateMin = 6.0f,
             elevateMax = 6.4f,
             highMin = 6.5f,
-            highMax = 8.0f
+            highMax = 8.0f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.Erythrocytes
         ),
 
         ESR(
@@ -679,7 +732,9 @@ object RiskThreshold {
             elevateMin = 16f,
             elevateMax = 30f,
             highMin = 31f,
-            highMax = 150f
+            highMax = 150f,
+            direction = RiskDirection.HIGHER_IS_WORSE,
+            literature = RiskLiterature.ESR
         ),
 
         Iron(
@@ -689,7 +744,9 @@ object RiskThreshold {
             elevateMin = 176f,
             elevateMax = 220f,
             highMin = 221f,
-            highMax = 350f
+            highMax = 350f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.Iron
         ),
 
         Ferritin(
@@ -699,7 +756,9 @@ object RiskThreshold {
             elevateMin = 401f,
             elevateMax = 800f,
             highMin = 801f,
-            highMax = 3000f
+            highMax = 3000f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.Ferritin
         )
     }
 
@@ -712,9 +771,21 @@ object RiskThreshold {
         val elevateMax: Float,
         val highMin: Float,
         val highMax: Float,
-        val direction: RiskDirection = RiskDirection.DEFAULT,
-        val literature: RiskLiterature = RiskLiterature.Default
+        val direction: RiskDirection,
+        val literature: RiskLiterature
     ) {
+
+        HDL(
+            keyName = BioMarker.HDL.displayName,
+            highMin = 0f,
+            highMax = 49f,
+            elevateMin = 50f,
+            elevateMax = 59f,
+            normalMin = 60f,
+            normalMax = 100f,
+            direction = RiskDirection.LOWER_IS_WORSE,
+            literature = RiskLiterature.HDL
+        ),
 
         Creatinine(
             keyName = BioMarker.CREATININE.displayName,
@@ -723,7 +794,9 @@ object RiskThreshold {
             elevateMin = 1.05f,
             elevateMax = 1.99f,
             highMin = 2.0f,
-            highMax = 15.0f
+            highMax = 15.0f,
+            direction = RiskDirection.HIGHER_IS_WORSE,
+            literature = RiskLiterature.Creatinine
         ),
 
         UricAcid(
@@ -733,7 +806,9 @@ object RiskThreshold {
             elevateMin = 6.1f,
             elevateMax = 8.9f,
             highMin = 9.0f,
-            highMax = 20.0f
+            highMax = 20.0f,
+            direction = RiskDirection.HIGHER_IS_WORSE,
+            literature = RiskLiterature.UricAcid
         ),
 
         GGT(
@@ -743,7 +818,9 @@ object RiskThreshold {
             elevateMin = 37f,
             elevateMax = 180f,
             highMin = 181f,
-            highMax = 1500f
+            highMax = 1500f,
+            direction = RiskDirection.HIGHER_IS_WORSE,
+            literature = RiskLiterature.GGT
         ),
 
         Hemoglobin(
@@ -753,7 +830,9 @@ object RiskThreshold {
             elevateMin = 15.6f,
             elevateMax = 16.9f,
             highMin = 17.0f,
-            highMax = 25.0f
+            highMax = 25.0f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.Hemoglobin
         ),
 
         Hematocrit(
@@ -763,7 +842,9 @@ object RiskThreshold {
             elevateMin = 47.0f,
             elevateMax = 54.0f,
             highMin = 55.0f,
-            highMax = 75.0f
+            highMax = 75.0f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.Hematocrit
         ),
 
         Erythrocytes(
@@ -773,7 +854,9 @@ object RiskThreshold {
             elevateMin = 5.2f,
             elevateMax = 5.7f,
             highMin = 5.8f,
-            highMax = 8.0f
+            highMax = 8.0f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.Erythrocytes
         ),
 
         ESR(
@@ -783,7 +866,9 @@ object RiskThreshold {
             elevateMin = 21f,
             elevateMax = 40f,
             highMin = 41f,
-            highMax = 150f
+            highMax = 150f,
+            direction = RiskDirection.HIGHER_IS_WORSE,
+            literature = RiskLiterature.ESR
         ),
 
         Iron(
@@ -793,7 +878,9 @@ object RiskThreshold {
             elevateMin = 171f,
             elevateMax = 220f,
             highMin = 221f,
-            highMax = 350f
+            highMax = 350f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.Iron
         ),
 
         Ferritin(
@@ -803,7 +890,9 @@ object RiskThreshold {
             elevateMin = 151f,
             elevateMax = 500f,
             highMin = 501f,
-            highMax = 3000f
+            highMax = 3000f,
+            direction = RiskDirection.BOTH_EXTREMES,
+            literature = RiskLiterature.Ferritin
         )
     }
 }

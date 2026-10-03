@@ -17,6 +17,7 @@ import androidx.compose.material.icons.rounded.Inventory2
 import androidx.compose.material.icons.rounded.LocalFireDepartment
 import androidx.compose.material.icons.rounded.Medication
 import androidx.compose.material.icons.rounded.MonitorHeart
+import androidx.compose.material.icons.rounded.MonitorWeight
 import androidx.compose.material.icons.rounded.Psychology
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.Science
@@ -497,4 +498,12 @@ enum class BioMarker(
         unit = "s",
         icon = Icons.Rounded.Schedule
     ),
+
+    BMI(
+        key = "bmi",
+        displayName = "Índice de masa corporal",
+        compactName = "IMC",
+        unit = "kg/m²",
+        icon = Icons.Rounded.MonitorWeight
+    )
 }

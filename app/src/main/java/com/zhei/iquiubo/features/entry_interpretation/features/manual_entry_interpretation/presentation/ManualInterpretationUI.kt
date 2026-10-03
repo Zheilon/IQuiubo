@@ -87,7 +87,7 @@ import com.zhei.iquiubo.core.common.ResponsiveText
 import com.zhei.iquiubo.core.common.dashedBorder
 import com.zhei.iquiubo.core.common.locals.LocalSpacing
 import com.zhei.iquiubo.core.navigation.Scenes
-import com.zhei.iquiubo.features.entry_interpretation.features.manual_entry_interpretation.features.fillingInToInterpretation.presentation.FillingInToInterpVM
+import com.zhei.iquiubo.features.entry_interpretation.features.fillingInToInterpretation.presentation.FillingInToInterpVM
 import com.zhei.iquiubo.ui.theme.IQuiuboColorPallete
 import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.delay

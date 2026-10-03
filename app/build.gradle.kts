@@ -20,7 +20,7 @@ android {
 
         // funcionalidades nuevas que no rompen nada. Ej:
         // agregas el módulo de interpretación de resultados en Diabeat.
-        val minor = 3
+        val minor = 4
 
         // Correcciones bugs o ajustes menores.
         val patch = 1
@@ -116,6 +116,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
 
 
+    // Firebase functions
+    implementation("com.google.firebase:firebase-functions-ktx")
+    implementation("com.google.firebase:firebase-functions")
+
+
     // Credential Manager (solo si harás Google Sign-In)
     implementation("androidx.credentials:credentials:1.3.0")
     implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
@@ -141,6 +146,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    // Util para configurar el splash screen
+    // ---------- Util para configurar el splash screen
     implementation("androidx.core:core-splashscreen:1.0.1")
+
+    // ---------- Librería para usar los modelos hechos en TensorFlow
+    implementation("com.google.ai.edge.litert:litert:1.4.0")
 }

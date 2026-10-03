@@ -9,7 +9,7 @@ import com.zhei.iquiubo.core.navigation.MyNavGraph
 import com.zhei.iquiubo.core.presentation.AppViewModel
 import com.zhei.iquiubo.core.presentation.CoordinatorFlowSceneVM
 import com.zhei.iquiubo.core.presentation.StateSceneVM
-import com.zhei.iquiubo.features.entry_interpretation.features.manual_entry_interpretation.features.fillingInToInterpretation.presentation.FillingInToInterpVM
+import com.zhei.iquiubo.features.entry_interpretation.features.fillingInToInterpretation.presentation.FillingInToInterpVM
 import com.zhei.iquiubo.features.home.presentation.HomeVM
 import com.zhei.iquiubo.features.entry_interpretation.features.manual_entry_interpretation.presentation.ManualInterpretationVM
 import com.zhei.iquiubo.ui.theme.IQuiuboTheme
