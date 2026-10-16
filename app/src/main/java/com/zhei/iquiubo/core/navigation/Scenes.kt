@@ -16,6 +16,9 @@ sealed class Scenes {
     @Serializable
     data object HomeScene: Scenes()
 
+    @Serializable
+    data object GetValuesForPriorityScene: Scenes()
+
     // Este bloque constituye las pantallas asociadas al
     // gráfo de navegación de la sección de Interpretation.
 
@@ -39,11 +42,11 @@ sealed class Scenes {
         data object Filling: InterpretationScenes()
 
         @Serializable
-        data object PriorityResults: InterpretationScenes()
-
-        @Serializable
         data object Scanner: InterpretationScenes()
     }
+
+    @Serializable
+    data object ShowPriorityResultsScene: InterpretationScenes()
 
     @Serializable
     data object MonitoringScene: Scenes()

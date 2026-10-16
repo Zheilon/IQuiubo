@@ -1,5 +1,4 @@
 package com.zhei.iquiubo.features.monitoring.presentation
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,13 +21,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.InlineTextContent
-import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Equalizer
-import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.SettingsAccessibility
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.Icon
@@ -40,17 +35,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.Placeholder
-import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zhei.iquiubo.core.common.Constants
@@ -422,7 +412,7 @@ import kotlinx.coroutines.launch
 fun TextDetailsIntoBiomarkerDetails() {
 
     val spacing = LocalSpacing.current
-    val width = (Constants.WIDTH_DP_DEVICE() - (spacing.md * 2)) / 2
+    val width = (Constants.widthDpDevice() - (spacing.md * 2)) / 2
 
     val inlineId = "Rango optimo"
     val inlineWidth = (inlineId.length * 0.55f + 0.8f).em
@@ -457,7 +447,7 @@ fun TextDetailsIntoBiomarkerDetails() {
 
     val spacing = LocalSpacing.current
     val shape = RoundedCornerShape(spacing.md)
-    val width = (Constants.WIDTH_DP_DEVICE() - (spacing.md * 2)) / 2
+    val width = (Constants.widthDpDevice() - (spacing.md * 2)) / 2
 
     val currentBiomarker by monitoringVM.biomarkerSelected.collectAsStateWithLifecycle()
 

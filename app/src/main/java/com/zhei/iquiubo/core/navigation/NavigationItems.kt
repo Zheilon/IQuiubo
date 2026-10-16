@@ -33,7 +33,7 @@ sealed class NavigationItems(
 
     data object Monitoring: NavigationItems(
         route = Scenes.MonitoringScene,
-        title = "Seguimiento",
+        title = "Control",
         filledIcon = Icons.Filled.MonitorHeart,
         outlinedIcon = Icons.Outlined.MonitorHeart,
     )

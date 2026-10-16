@@ -34,6 +34,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.zhei.iquiubo.core.common.locals.LocalSpacing
 import com.zhei.iquiubo.core.presentation.CoordinatorFlowSceneVM
 import com.zhei.iquiubo.ui.theme.IQuiuboColorPallete
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 
 
 @Composable fun AppNavBar(
@@ -44,32 +46,37 @@ import com.zhei.iquiubo.ui.theme.IQuiuboColorPallete
 
     val spacing = LocalSpacing.current
     val toShow = toShow(nav)
+    val hazeState = rememberHazeState()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroudColor(nav))
-    ) {
+    Box {
 
-        navHost()
+        Box (
+            modifier = Modifier
+                .fillMaxSize()
+                .hazeSource(hazeState)
+                .background(color = Color.Transparent)
+        ) {
+
+            // Este navHost() basicamente es la UI
+            navHost()
+        }
 
         if (toShow) {
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = spacing.md)
-                    .navigationBarsPadding(),
+                    .navigationBarsPadding()
+                    .padding(horizontal = spacing.md),
                 contentAlignment = Alignment.BottomCenter
             ) {
 
                 MyNavigationBar(
                     nav = nav,
+                    hazeState = hazeState,
                     onPaddingBotton = { heightNavBar(it) }
                 )
             }
         }
-
     }
 }
 
@@ -79,7 +86,10 @@ private fun backgroudColor(nav: NavHostController): Color {
     val current = nav.currentBackStackEntryAsState().value?.destination
     return when {
         current?.hasRoute(Scenes.HomeScene::class) == true ->
-            IQuiuboColorPallete.moradoPrimario
+            IQuiuboColorPallete.backgroundLight
+
+        current?.hasRoute(Scenes.GetValuesForPriorityScene::class) == true ->
+            Color(0xFF6B21A8)
 
         current?.hasRoute(Scenes.InterpretationScenes.Entry::class) == true ->
             IQuiuboColorPallete.accentMiddle

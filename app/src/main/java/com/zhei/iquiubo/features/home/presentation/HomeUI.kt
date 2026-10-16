@@ -31,7 +31,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -57,31 +56,14 @@ import com.zhei.iquiubo.core.common.locals.LocalSpacing
 import com.zhei.iquiubo.ui.theme.IQuiuboColorPallete
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.automirrored.filled.Assignment
-import androidx.compose.material.icons.filled.Assignment
-import androidx.compose.material.icons.filled.Biotech
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.FilterAlt
-import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Psychology
-import androidx.compose.material.icons.filled.Science
-import androidx.compose.material.icons.filled.Sip
 import androidx.compose.material.icons.outlined.Biotech
-import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
@@ -89,29 +71,18 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import com.zhei.iquiubo.R
-import com.zhei.iquiubo.core.common.dashedBorder
 import com.zhei.iquiubo.core.common.ifIsIntToInt
 import com.zhei.iquiubo.core.domain.model.BioMarker
 import com.zhei.iquiubo.core.domain.model.User
 import com.zhei.iquiubo.features.home.domain.model.RiskBuild
 import com.zhei.iquiubo.features.home.domain.model.RiskGradient
 import kotlin.math.cos
-import kotlin.math.roundToInt
 import kotlin.math.sin
 
 
@@ -779,7 +750,7 @@ import kotlin.math.sin
 ) {
 
     val spacing = LocalSpacing.current
-    val sizeCard = (Constants.WIDTH_DP_DEVICE() - (spacing.md * 2)) / 2
+    val sizeCard = (Constants.widthDpDevice() - (spacing.md * 2)) / 2
 
     Column (
         modifier = Modifier

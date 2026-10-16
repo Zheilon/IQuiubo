@@ -3,7 +3,10 @@ import android.util.Log
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.InfiniteRepeatableSpec
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -47,6 +50,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
@@ -55,9 +60,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.colorspace.WhitePoint
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.ParagraphStyle
@@ -71,26 +81,55 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import com.zhei.iquiubo.R
 import com.zhei.iquiubo.core.common.ButtonRippleColor
 import com.zhei.iquiubo.core.common.MyFont
 import com.zhei.iquiubo.core.common.ResponsiveLineHeight
 import com.zhei.iquiubo.core.common.ResponsiveText
+import com.zhei.iquiubo.core.common.bottomLine
 import com.zhei.iquiubo.core.common.dashedBorder
 import com.zhei.iquiubo.core.common.locals.LocalSpacing
+import com.zhei.iquiubo.core.navigation.Scenes
+import com.zhei.iquiubo.features.personal_info.presentation.PersonalInfoVM
+import com.zhei.iquiubo.ui.theme.ElectricBluePallete
 import com.zhei.iquiubo.ui.theme.IQuiuboColorPallete
 import kotlinx.coroutines.withContext
+import kotlin.math.PI
+import kotlin.math.sin
 
+
+/**
+ * Notas:
+ *
+ * No utilizar rememberInfiniteTransition de manera directa sin primero
+ * almacenarla primero en una variable. Y demás funcionalidades que utilizen
+ * este mismo principio.
+ * */
 
 @Composable fun HomeUIV2(
     heightNavBar: Dp,
-    homeVM: HomeVM
+    homeVM: HomeVM,
+    onNavigate: (Scenes) -> Unit
 ) {
 
     val spacing = LocalSpacing.current
+    val lifecycle = LocalLifecycleOwner.current.lifecycle
+
+    LaunchedEffect(Unit) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            homeVM.navEvents.collect {
+                onNavigate(it)
+            }
+        }
+    }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(ElectricBluePallete.BACKGROUND),
         // ese (+ spacing.md) significa, que le estoy agregando el
         // espacio del padding generado por el column que se encuentra
         // dentro de uno de los item {}, entonces añado tamaño del navbar
@@ -104,23 +143,22 @@ import kotlinx.coroutines.withContext
 
         item {
 
-            Column (
-                modifier = Modifier
-                    .background(IQuiuboColorPallete.moradoPrimario)
-                    .padding(spacing.md ),
+            Column(
+                modifier = Modifier.padding(spacing.md),
                 verticalArrangement = Arrangement.spacedBy(spacing.xl)
             ) {
 
                 Greeting()
 
-                CardKnowYourPriorityAccess()
+                CardKnowYourPriorityAccess(homeVM)
 
-                CardInterpretYourResume()
+                CardInterpretYourResume(homeVM)
 
                 ResumeLastInterpretation()
             }
         }
     }
+
 }
 
 
@@ -139,11 +177,11 @@ import kotlinx.coroutines.withContext
     Row (
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(5.dp)
-            .background(color = IQuiuboColorPallete.moradoPrimario)
+            .background(color = Color.Transparent)
             .statusBarsPadding()
             .padding(spacing.md),
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
 
         // IconHeartHeader()
@@ -151,8 +189,6 @@ import kotlinx.coroutines.withContext
         // Spacer(modifier = Modifier.width(spacing.md))
 
         TextNameApp()
-
-        Spacer(modifier = Modifier.weight(1f))
 
         AvatarHeaderName()
     }
@@ -178,26 +214,42 @@ import kotlinx.coroutines.withContext
 }
 
 
+
 @Composable private fun TextNameApp() {
 
     val spacing = LocalSpacing.current
 
-    Text(
-        text = buildAnnotatedString {
-            withStyle(
-                SpanStyle(
-                    color = Color.Black,
-                    fontFamily = MyFont.spaceGroteskRegular,
-                    fontSize = ResponsiveText.title(),
-                )
-            ) { append("IQuiubo") }
-        },
-        lineHeight = ResponsiveLineHeight.title(),
-        modifier = Modifier
-            .background(IQuiuboColorPallete.backgroundLight, RoundedCornerShape(10.dp))
-            .padding(horizontal = spacing.sm)
-    )
+    Row(
+        verticalAlignment = Alignment.Bottom
+    ) {
+
+        Text(
+            text = "I",
+            color = ElectricBluePallete.BLUE_2,
+            fontWeight = FontWeight.Bold,
+            fontFamily = MyFont.jakartaSansExtrabold,
+            fontSize = ResponsiveText.displayBig(),
+            lineHeight = ResponsiveLineHeight.displayBig()
+        )
+
+        Image(
+            painter = painterResource(R.drawable.iquiubo_log_v3_no_back),
+            contentDescription = "word",
+            modifier = Modifier.size(spacing.xxl)
+        )
+
+        Text(
+            text = "uiubo",
+            color = ElectricBluePallete.BLUE_2,
+            fontWeight = FontWeight.Bold,
+            fontFamily = MyFont.jakartaSansExtrabold,
+            fontSize = ResponsiveText.displayBig(),
+            lineHeight = ResponsiveLineHeight.displayBig()
+        )
+    }
+
 }
+
 
 
 @Composable private fun AvatarHeaderName() {
@@ -211,7 +263,7 @@ import kotlinx.coroutines.withContext
         modifier = Modifier
             .size(spacing.xxl)
             .clip(CircleShape)
-            .background(IQuiuboColorPallete.moradoPrimario, RoundedCornerShape(spacing.md))
+            .background(ElectricBluePallete.BLUE_2, RoundedCornerShape(spacing.md))
             .padding(spacing.sm)
     )
 }
@@ -230,6 +282,7 @@ import kotlinx.coroutines.withContext
 @Composable private fun NameGreetingAndIcon() {
 
     val spacing = LocalSpacing.current
+    val color = colorForDot()
 
     Row (
         horizontalArrangement = Arrangement.spacedBy(spacing.sm),
@@ -240,7 +293,7 @@ import kotlinx.coroutines.withContext
             modifier = Modifier
                 .size(spacing.md)
                 .clip(CircleShape)
-                .background(color = colorForDot()),
+                .background(color = color),
             contentAlignment = Alignment.Center
         ) {
 
@@ -248,7 +301,7 @@ import kotlinx.coroutines.withContext
                 modifier = Modifier
                     .size(spacing.sm)
                     .clip(CircleShape)
-                    .background(color = IQuiuboColorPallete.moradoPrimario)
+                    .background(color = IQuiuboColorPallete.backgroundLight)
             )
         }
 
@@ -257,24 +310,31 @@ import kotlinx.coroutines.withContext
             fontFamily = MyFont.spaceGroteskRegular,
             fontSize = ResponsiveText.headline(),
             fontWeight = FontWeight.ExtraBold,
-            color = Color.White
+            color = Color.Black
         )
     }
 }
 
 
 
-@Composable private fun colorForDot(): Color =
-    rememberInfiniteTransition("")
-        .animateColor(
-            initialValue = Color(0xFF00867B),
-            targetValue = Color(0xFF89F5E7),
-            animationSpec = InfiniteRepeatableSpec(
-                repeatMode = RepeatMode.Reverse,
-                animation = tween(1500  )
-            ),
-            label = ""
-        ).value
+/**
+ * No utilizar rememberInfiniteTransition de manera directa sin primero
+ * almacenarla primero en una variable
+ * */
+@Composable private fun colorForDot(): Color {
+    val animation = rememberInfiniteTransition("dot_color")
+    val color by animation.animateColor(
+        initialValue = Color(0xFF00867B),
+        targetValue = Color(0xFF89F5E7),
+        animationSpec = InfiniteRepeatableSpec(
+            repeatMode = RepeatMode.Reverse,
+            animation = tween(1500  )
+        ),
+        label = "dot_color_anim"
+    )
+    return color
+}
+
 
 
 
@@ -284,13 +344,15 @@ import kotlinx.coroutines.withContext
         fontFamily = MyFont.workSansRegular,
         fontSize = ResponsiveText.small(),
         lineHeight = ResponsiveLineHeight.small(),
-        color = Color.White
+        color = Color.Black
     )
 }
 
 
 
-@Composable private fun CardKnowYourPriorityAccess() {
+@Composable private fun CardKnowYourPriorityAccess(
+    homeVM: HomeVM
+) {
 
     val spacing = LocalSpacing.current
     val mainCardShape = RoundedCornerShape(spacing.xl)
@@ -309,8 +371,8 @@ import kotlinx.coroutines.withContext
                 .background(
                     Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFF9333EA),
-                            Color(0xFF6B21A8)
+                            ElectricBluePallete.BLUE_1,
+                            ElectricBluePallete.BLUE_4
                         )
                     )
                 )
@@ -324,6 +386,7 @@ import kotlinx.coroutines.withContext
             // Contenido real
             Column(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(spacing.xl),
                 verticalArrangement = Arrangement.spacedBy(spacing.sm),
                 horizontalAlignment = Alignment.Start
@@ -335,7 +398,7 @@ import kotlinx.coroutines.withContext
 
                 TextKnowYourPriority()
 
-                ButtonKnowPriority()
+                ButtonKnowPriority(homeVM)
             }
         }
     }
@@ -350,7 +413,7 @@ import kotlinx.coroutines.withContext
     Row (
         modifier = Modifier
             .border(1.dp, IQuiuboColorPallete.backgroundLight.copy(alpha = 0.4f), CircleShape)
-            .background(Color(0xFF9333EA).copy(0.8f), CircleShape)
+            .background(ElectricBluePallete.BLUE_5.copy(0.5f), CircleShape)
             .padding(horizontal = spacing.md, vertical = spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(spacing.sm)
@@ -463,7 +526,9 @@ import kotlinx.coroutines.withContext
 
 
 
-@Composable private fun ButtonKnowPriority() {
+@Composable private fun ButtonKnowPriority(
+    homeVM: HomeVM
+) {
 
 
     val spacing = LocalSpacing.current
@@ -483,12 +548,12 @@ import kotlinx.coroutines.withContext
                 ),
                 contentPadding = PaddingValues(start = spacing.md, end = spacing.md),
                 shape = RoundedCornerShape(spacing.sm),
-                onClick = {  }
+                onClick = { homeVM.navigateTo(Scenes.GetValuesForPriorityScene) }
             ) {
 
                 Text(
                     text = "Conocer",
-                    color = IQuiuboColorPallete.moradoPrimario,
+                    color = ElectricBluePallete.BLUE_1,
                     fontSize = ResponsiveText.button(),
                     fontFamily = MyFont.workSansRegular,
                     fontWeight = FontWeight.Bold
@@ -499,7 +564,7 @@ import kotlinx.coroutines.withContext
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
                     contentDescription = "arrow_forward",
-                    tint = IQuiuboColorPallete.moradoPrimario
+                    tint = ElectricBluePallete.BLUE_1
                 )
             }
         }
@@ -508,7 +573,9 @@ import kotlinx.coroutines.withContext
 
 
 
-@Composable private fun CardInterpretYourResume() {
+@Composable private fun CardInterpretYourResume(
+    homeVM: HomeVM
+) {
 
     val spacing = LocalSpacing.current
     val shape = RoundedCornerShape(spacing.md)
@@ -523,9 +590,18 @@ import kotlinx.coroutines.withContext
 
         Box(
             modifier = Modifier
+                .size(120.dp)
+                .background(
+                    ElectricBluePallete.BLUE_2,
+                    RoundedCornerShape(bottomStart = 300.dp, topEnd = spacing.md)
+                )
+        )
+
+        Box(
+            modifier = Modifier
                 .size(100.dp)
                 .background(
-                    Color(0xFFCA94FF),
+                    ElectricBluePallete.BLUE_4,
                     RoundedCornerShape(bottomStart = 100.dp, topEnd = spacing.md)
                 )
         )
@@ -542,7 +618,7 @@ import kotlinx.coroutines.withContext
         Column (
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(spacing.md),
+                .padding(spacing.xl),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.spacedBy(spacing.md)
         ) {
@@ -553,7 +629,7 @@ import kotlinx.coroutines.withContext
 
             DescriptionInterpretResult()
 
-            ButtonDoInterpret()
+            ButtonDoInterpret(homeVM)
         }
     }
 }
@@ -596,7 +672,7 @@ import kotlinx.coroutines.withContext
         modifier = Modifier
             .fillMaxWidth()
             .shadow(8.dp, shape = CircleShape, spotColor = Color.Black)
-            .background(Color(0xFFB66DFF), CircleShape)
+            .background(ElectricBluePallete.BLUE_1, CircleShape)
             .padding(horizontal = spacing.sm),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(spacing.sm)
@@ -627,7 +703,7 @@ import kotlinx.coroutines.withContext
         fontSize = ResponsiveText.body(),
         lineHeight = ResponsiveLineHeight.body(),
         fontWeight = FontWeight.Bold,
-        color = Color.White
+        color = Color.Black
     )
 }
 
@@ -639,13 +715,15 @@ fun DescriptionInterpretResult() {
         fontFamily = MyFont.workSansRegular,
         fontSize = ResponsiveText.small(),
         lineHeight = ResponsiveLineHeight.small(),
-        color = Color.White,
+        color = Color.Black,
         textAlign = TextAlign.Justify,
     )
 }
 
 
-@Composable private fun ButtonDoInterpret() {
+@Composable private fun ButtonDoInterpret(
+    homeVM: HomeVM
+) {
 
     val spacing = LocalSpacing.current
 
@@ -655,16 +733,16 @@ fun DescriptionInterpretResult() {
 
         Button(
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White
+                containerColor = ElectricBluePallete.BLUE_5.copy(alpha = 0.1f)
             ),
             contentPadding = PaddingValues(start = spacing.md, end = spacing.md),
             shape = RoundedCornerShape(spacing.sm),
-            onClick = {  }
+            onClick = { homeVM.navigateTo(Scenes.InterpretationScenes.Entry) }
         ) {
 
             Text(
                 text = "Interpretar",
-                color = IQuiuboColorPallete.moradoPrimario,
+                color = Color.Black,
                 fontSize = ResponsiveText.button(),
                 fontFamily = MyFont.workSansRegular,
                 fontWeight = FontWeight.Bold
@@ -675,7 +753,7 @@ fun DescriptionInterpretResult() {
             Icon(
                 imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
                 contentDescription = "arrow_forward",
-                tint = IQuiuboColorPallete.moradoPrimario
+                tint = Color.Black
             )
         }
     }
@@ -697,21 +775,8 @@ fun DescriptionInterpretResult() {
         Column (
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(5.dp, spotColor = Color.Black, shape = shape)
-                .border(
-                    1.dp,
-                    IQuiuboColorPallete.moradoPrimario.copy(alpha = 0.5f),
-                    RoundedCornerShape(spacing.sm)
-                )
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFF6B21A8),
-                            Color(0xFF9333EA)
-                        )
-                    ),
-                    shape
-                )
+                //.shadow(5.dp, spotColor = Color.Black, shape = shape)
+                .background(Color.White, shape)
                 .padding(spacing.xl),
             verticalArrangement = Arrangement.spacedBy(spacing.md)
         ) {
@@ -749,7 +814,7 @@ fun DescriptionInterpretResult() {
         fontFamily = MyFont.workSansRegular,
         fontSize = ResponsiveText.small(),
         lineHeight = ResponsiveLineHeight.small(),
-        color = Color.White,
+        color = Color.Black,
         fontWeight = FontWeight.ExtraBold
     )
 }
@@ -766,7 +831,7 @@ fun DescriptionInterpretResult() {
         Icon(
             imageVector = Icons.Default.AccessTime,
             contentDescription = "watch",
-            tint = Color.White,
+            tint = Color.Black,
             modifier = Modifier.size(spacing.md)
         )
 
@@ -775,7 +840,7 @@ fun DescriptionInterpretResult() {
             fontFamily = MyFont.workSansRegular,
             fontSize = ResponsiveText.small(),
             lineHeight = ResponsiveLineHeight.small(),
-            color = Color.White
+            color = Color.Black
         )
     }
 }
@@ -799,7 +864,7 @@ private fun TextTitleResumeInterpret() {
                     SpanStyle(
                         fontFamily = MyFont.workSansRegular,
                         fontWeight = FontWeight.ExtraBold,
-                        color = Color.White,
+                        color = Color.Black,
                         fontSize = titleSize
                     )
                 ) {
@@ -815,7 +880,7 @@ private fun TextTitleResumeInterpret() {
                 withStyle(
                     SpanStyle(
                         fontFamily = MyFont.workSansRegular,
-                        color = Color.White,
+                        color = Color.Black,
                         fontSize = descriptionSize
                     )
                 ) {
@@ -867,12 +932,10 @@ private fun TextTitleResumeInterpret() {
     Column (
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, Color.White.copy(alpha = 0.1f), shape)
             .background(
-                Color(0xFF9333EA).copy(alpha = 0.2f),
+                Color.White,
                 shape = shape
-            )
-            .padding(spacing.md),
+            ),
         verticalArrangement = Arrangement.spacedBy(spacing.sm)
     ) {
 
@@ -896,7 +959,7 @@ private fun TextTitleResumeInterpret() {
         Icon(
             imageVector = Icons.Default.CheckCircleOutline,
             contentDescription = "check",
-            tint = IQuiuboColorPallete.backgroundLight
+            tint = ElectricBluePallete.BLUE_3
         )
 
         Text(
@@ -904,7 +967,7 @@ private fun TextTitleResumeInterpret() {
             fontFamily = MyFont.workSansRegular,
             fontSize = ResponsiveText.body(),
             lineHeight = ResponsiveLineHeight.body(),
-            color = Color.White,
+            color = Color.Black,
             fontWeight = FontWeight.W500
         )
     }
@@ -917,7 +980,7 @@ private fun TextTitleResumeInterpret() {
         fontFamily = MyFont.workSansRegular,
         fontSize = ResponsiveText.caption(),
         lineHeight = ResponsiveLineHeight.caption(),
-        color = Color.White,
+        color = Color.Black,
         textAlign = TextAlign.Justify,
     )
 }
@@ -944,7 +1007,7 @@ private fun TextTitleResumeInterpret() {
             fontFamily = MyFont.workSansRegular,
             fontWeight = FontWeight.Bold,
             lineHeight = ResponsiveLineHeight.caption(),
-            color = IQuiuboColorPallete.backgroundLight,
+            color = ElectricBluePallete.BLUE_2,
             modifier = Modifier.weight(1f),
             textDecoration = TextDecoration.Underline
         )
@@ -952,7 +1015,7 @@ private fun TextTitleResumeInterpret() {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
             contentDescription = "arrow",
-            tint = IQuiuboColorPallete.backgroundLight
+            tint = ElectricBluePallete.BLUE_3
         )
     }
 }

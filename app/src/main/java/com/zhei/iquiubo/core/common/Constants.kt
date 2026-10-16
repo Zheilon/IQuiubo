@@ -1,4 +1,5 @@
 package com.zhei.iquiubo.core.common
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.systemBars
@@ -10,21 +11,23 @@ import java.time.YearMonth
 
 object  Constants {
 
-    val DEVICE_TOP_PADDING: @Composable () -> Dp = {
+    @Composable
+    fun deviceTopPadding(): Dp =
         WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
-    }
 
-    val DEVICE_BOTTOM_PADDING: @Composable () -> Dp = {
+    @Composable
+    fun deviceBottomPadding(): Dp =
         WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
-    }
 
-    val HEIGHT_DP_DEVICE: @Composable () -> Dp = {
+    @SuppressLint("ConfigurationScreenWidthHeight")
+    @Composable
+    fun heightDpDevice(): Dp =
         LocalConfiguration.current.screenHeightDp.dp
-    }
 
-    val WIDTH_DP_DEVICE: @Composable () -> Dp = {
+    @SuppressLint("ConfigurationScreenWidthHeight")
+    @Composable
+    fun widthDpDevice(): Dp =
         LocalConfiguration.current.screenWidthDp.dp
-    }
 
     const val SMALL_DEVICE_WIDTH_DP = 350
 

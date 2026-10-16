@@ -2,6 +2,7 @@ package com.zhei.iquiubo.core.mappers
 import com.zhei.iquiubo.core.common.toTimestamp
 import com.zhei.iquiubo.core.data.model.FirestoreUser
 import com.zhei.iquiubo.core.domain.model.User
+import kotlin.Int
 
 
 fun User.toDataFirestoreUser(): FirestoreUser =
@@ -15,5 +16,9 @@ fun User.toDataFirestoreUser(): FirestoreUser =
         policyAccepted = this.policyAccepted,
         birthDay = this.birthDay,
         sex = this.sex,
-        createdIn = this.createdIn.toTimestamp()
+        createdIn = this.createdIn.toTimestamp(),
+        heightCM = this.heightCM,
+        weightKG = this.weightKG,
+        activityLevel = this.activityLevel,
+        familyHistoryDiabetes = this.familyHistoryDiabetes
     )

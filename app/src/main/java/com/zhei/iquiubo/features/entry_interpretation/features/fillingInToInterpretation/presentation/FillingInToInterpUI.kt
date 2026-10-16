@@ -384,7 +384,7 @@ import kotlinx.coroutines.delay
                 ),
                 onClick = {
                     fillingInToInterpVM.onButtonToSendPrompt(
-                        Scenes.InterpretationScenes.PriorityResults
+                        Scenes.ShowPriorityResultsScene
                     )
                 }
             ) {

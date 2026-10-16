@@ -5,6 +5,7 @@ import com.zhei.iquiubo.core.data.model.FirestoreUser
 import com.zhei.iquiubo.core.domain.model.AuthUser
 import com.zhei.iquiubo.core.domain.model.Measurement
 import com.zhei.iquiubo.core.domain.model.User
+import kotlin.Int
 
 
 fun FirebaseUser.toDomainAuthUser(): AuthUser =
@@ -22,7 +23,11 @@ fun FirestoreUser.toDomainUser(): User =
         policyAccepted = this.policyAccepted,
         birthDay = this.birthDay,
         sex = this.sex,
-        createdIn = this.createdIn.toInstant()
+        createdIn = this.createdIn.toInstant(),
+        heightCM = this.heightCM,
+        weightKG = this.weightKG,
+        activityLevel = this.activityLevel,
+        familyHistoryDiabetes = this.familyHistoryDiabetes
     )
 
 

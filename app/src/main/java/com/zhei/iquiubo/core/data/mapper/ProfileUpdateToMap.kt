@@ -1,5 +1,5 @@
 package com.zhei.iquiubo.core.data.mapper
-import com.zhei.iquiubo.core.domain.model.ProfileUpdate
+import com.zhei.iquiubo.features.personal_info.domain.models.ProfileUpdate
 
 
 /**
@@ -16,4 +16,9 @@ fun ProfileUpdate.toCustomMap(): Map<String, Any> = buildMap {
     policyAccepted?.let { put("policyAccepted", it) }
     birthDay?.let { put("birthDay", it) }
     sex?.let { put("sex", it) }
+    heightCM?.let { put("heightCM", it) }
+    weightKG?.let { put("weightKG", it) }
+    activityLevel?.let { put("activityLevel", it) }
+    familyHistoryDiabetes?.let { put("familyHistoryDiabetes", it) }
+
 }

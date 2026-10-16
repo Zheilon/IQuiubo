@@ -20,7 +20,7 @@ android {
 
         // funcionalidades nuevas que no rompen nada. Ej:
         // agregas el módulo de interpretación de resultados en Diabeat.
-        val minor = 4
+        val minor = 5
 
         // Correcciones bugs o ajustes menores.
         val patch = 1
@@ -51,6 +51,8 @@ android {
     buildTypes {
         debug {
             isDebuggable = true
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
         release {
             signingConfig = signingConfigs.getByName("release")
@@ -151,4 +153,7 @@ dependencies {
 
     // ---------- Librería para usar los modelos hechos en TensorFlow
     implementation("com.google.ai.edge.litert:litert:1.4.0")
+
+    // ---------- Usado para hacer blur en algunas superficies
+    implementation("dev.chrisbanes.haze:haze:1.6.10")
 }

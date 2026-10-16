@@ -25,11 +25,12 @@ import com.zhei.iquiubo.features.entry_interpretation.presentation.EntryInterpre
 import com.zhei.iquiubo.features.home.presentation.HomeVM
 import com.zhei.iquiubo.features.entry_interpretation.features.manual_entry_interpretation.presentation.ManualInterpretationUI
 import com.zhei.iquiubo.features.entry_interpretation.features.manual_entry_interpretation.presentation.ManualInterpretationVM
-import com.zhei.iquiubo.features.entry_interpretation.features.show_priority_results.presentation.PriorityResultsUI
+import com.zhei.iquiubo.features.show_priority_results.presentation.ShowPriorityResultsUI
 import com.zhei.iquiubo.features.home.presentation.HomeUIV2
 import com.zhei.iquiubo.features.monitoring.presentation.MonitoringUI
+import com.zhei.iquiubo.features.put_rna_values.presentation.GetValuesForPriorityUI
 
-
+private const val DURATION = 500
 @Composable fun MyNavGraph(
     appViewModel: AppViewModel,
     stateSceneVM: StateSceneVM,
@@ -66,6 +67,7 @@ import com.zhei.iquiubo.features.monitoring.presentation.MonitoringUI
     coordinatorFlowSceneVM: CoordinatorFlowSceneVM
 ) {
 
+    // Variable encargada de almacenar el alto de la barra de navegación
     var heightNavBar by remember { mutableStateOf(0.dp) }
 
     AppNavBar(
@@ -77,46 +79,57 @@ import com.zhei.iquiubo.features.monitoring.presentation.MonitoringUI
             startDestination = Scenes.HomeScene,
             enterTransition = {
                 slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Down,
-                    animationSpec = tween(
-                        durationMillis = 500,
-                        easing = FastOutSlowInEasing
-                    )
-                ) + fadeIn()
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(DURATION, easing = FastOutSlowInEasing)
+                )
             },
             exitTransition = {
                 slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Up,
-                    animationSpec = tween(
-                        durationMillis = 500,
-                        easing = FastOutSlowInEasing
-                    )
-                ) + fadeOut()
+                    AnimatedContentTransitionScope.SlideDirection.Left,
+                    animationSpec = tween(DURATION, easing = FastOutSlowInEasing),
+                    targetOffset = { it / 4 }
+                )
             },
 
             popEnterTransition = {
                 slideIntoContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Down,
-                    animationSpec = tween(
-                        durationMillis = 500,
-                        easing = FastOutSlowInEasing
-                    )
-                ) + fadeIn()
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(DURATION, easing = FastOutSlowInEasing),
+                    initialOffset = { it / 4 }
+                )
             },
 
             popExitTransition = {
                 slideOutOfContainer(
-                    AnimatedContentTransitionScope.SlideDirection.Up,
-                    animationSpec = tween(
-                        durationMillis = 500,
-                        easing = FastOutSlowInEasing
-                    )
-                ) + fadeOut()
+                    AnimatedContentTransitionScope.SlideDirection.Right,
+                    animationSpec = tween(DURATION, easing = FastOutSlowInEasing)
+                )
             }
         ) {
 
             composable<Scenes.HomeScene> {
-                HomeUIV2(heightNavBar, homeVM)
+                HomeUIV2(
+                    heightNavBar =  heightNavBar,
+                    homeVM = homeVM,
+                    onNavigate = {
+                        nav.navigate(it) {
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+            }
+
+
+            composable<Scenes.GetValuesForPriorityScene> {
+                GetValuesForPriorityUI(
+                    onNavigate = {
+                        nav.navigate(it) {
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
 
 
@@ -142,6 +155,7 @@ import com.zhei.iquiubo.features.monitoring.presentation.MonitoringUI
                     )
                 }
 
+
                 composable<Scenes.InterpretationScenes.Manual> {
                     ManualInterpretationUI(
                         manualInterpretationVM = manualInterpretationVM,
@@ -156,6 +170,7 @@ import com.zhei.iquiubo.features.monitoring.presentation.MonitoringUI
                         }
                     )
                 }
+
 
                 composable<Scenes.InterpretationScenes.Filling> {
                     FillingInToInterpUI(
@@ -172,13 +187,10 @@ import com.zhei.iquiubo.features.monitoring.presentation.MonitoringUI
                         }
                     )
                 }
+            }
 
-                composable<Scenes.InterpretationScenes.PriorityResults> {
-                    PriorityResultsUI(
-                        fillingInToInterpVM = fillingInToInterpVM
-                    )
-                }
-
+            composable<Scenes.ShowPriorityResultsScene> {
+                ShowPriorityResultsUI()
             }
 
 

@@ -82,6 +82,7 @@ fun Any.ifIsIntToInt(): String {
     }
     return if (doubleValue == doubleValue.toInt().toDouble()) {
         doubleValue.toInt().toString()
+
     } else {
         doubleValue.toString()
     }

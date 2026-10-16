@@ -1,4 +1,5 @@
 package com.zhei.iquiubo.features.personal_info.presentation
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -7,15 +8,17 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -29,6 +32,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
@@ -38,10 +44,15 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
+import androidx.compose.material.icons.filled.MonitorWeight
+import androidx.compose.material.icons.filled.PersonSearch
+import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.Wc
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -51,19 +62,30 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -72,7 +94,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -84,8 +109,11 @@ import com.zhei.iquiubo.core.common.MyFont
 import com.zhei.iquiubo.core.common.ResponsiveLineHeight
 import com.zhei.iquiubo.core.common.ResponsiveText
 import com.zhei.iquiubo.core.common.locals.LocalSpacing
+import com.zhei.iquiubo.core.domain.model.NeuralNetConfig
+import com.zhei.iquiubo.ui.theme.ElectricBluePallete
 import com.zhei.iquiubo.ui.theme.IQuiuboColorPallete
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.drop
 
 
 @Composable fun PersonalInfoUI(
@@ -96,7 +124,7 @@ import kotlinx.coroutines.delay
     val spacing = LocalSpacing.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
 
-    Log.e("WIDTH DP DEVICE", Constants.WIDTH_DP_DEVICE().toString())
+    Log.e("WIDTH DP DEVICE", Constants.widthDpDevice().toString())
 
     LaunchedEffect(Unit) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -112,20 +140,13 @@ import kotlinx.coroutines.delay
         modifier = Modifier
             .fillMaxSize()
             // Amarillo fondo anterior: Color(0xFFFFD93D)
-            .background(IQuiuboColorPallete.backgroundLight)
+            .background(ElectricBluePallete.BACKGROUND)
     ) {
-
-        //Image(
-        //    painter = painterResource(id = R.drawable.back_get_username_v4),
-        //    contentDescription = "back_get_user_name",
-        //    modifier = Modifier.fillMaxSize(),
-        //    contentScale = ContentScale.Crop
-        //)
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = spacing.xl, vertical = spacing.md)
+                .padding(horizontal = spacing.md, vertical = spacing.md)
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .imePadding()
@@ -147,14 +168,6 @@ import kotlinx.coroutines.delay
 
                 Spacer(modifier = Modifier.height(spacing.md))
 
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = spacing.xxl),
-                    color = Color(0xFF9333EA).copy(0.2f),
-                    thickness = 2.dp
-                )
-
-                Spacer(modifier = Modifier.height(spacing.md))
-
                 TextToAdvertiserToUser()
 
                 Spacer(modifier = Modifier.height(spacing.xl))
@@ -163,19 +176,76 @@ import kotlinx.coroutines.delay
 
                 Spacer(modifier = Modifier.height(spacing.lg))
 
-                TypeSexArea(personalInfoVM)
+                TypeSexAreaV2(personalInfoVM)
+
+                Spacer(modifier = Modifier.height(spacing.lg))
+
+                SelectFamilyHistoryDiabetes(personalInfoVM)
+
+                Spacer(modifier = Modifier.height(spacing.lg))
+
+                SelectActivityLevelArea(personalInfoVM)
+
+                Spacer(modifier = Modifier.height(spacing.lg))
+
+                SelectHeightCmArea(personalInfoVM)
+
+                Spacer(modifier = Modifier.height(spacing.lg))
+
+                SelectWeightKg(personalInfoVM)
+
             }
 
             // BOTÓN FIJO: fuera del weight → nunca se comprime
             Spacer(Modifier.height(spacing.xl))
 
             ButtonForNextScene(personalInfoVM)
-
-            Spacer(Modifier.height(spacing.md))
         }
 
     }
 }
+
+
+
+/**
+ * Función personalizada para poner Una (Imagen) y un (texto)
+ * en algún componente. Se desarrollo de esta manera para
+ * garantizar su usabilidad en distintos componentes.
+ * */
+@Composable private fun RowCustomTitle(
+    icon: ImageVector,
+    title: String,
+) {
+
+    val spacing = LocalSpacing.current
+    val shape = RoundedCornerShape(spacing.sm)
+
+    Row(
+        modifier = Modifier.wrapContentWidth()
+            .background(ElectricBluePallete.BLUE_5.copy(alpha = 0.1f), shape)
+            .padding(horizontal = spacing.md, vertical = spacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(spacing.sm)
+    ) {
+
+        Icon(
+            imageVector = icon,
+            contentDescription = "custom_icon",
+            tint = ElectricBluePallete.BLUE_2,
+            modifier = Modifier.size(spacing.md)
+        )
+
+        Text(
+            text = title,
+            fontFamily = MyFont.workSansRegular,
+            fontSize = ResponsiveText.small(),
+            lineHeight = ResponsiveLineHeight.small(),
+            color = ElectricBluePallete.BLUE_2,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
 
 
 @Composable private fun TitleFirst() {
@@ -187,8 +257,8 @@ import kotlinx.coroutines.delay
         fontSize = ResponsiveText.displaymiddle(),
         lineHeight = ResponsiveText.displaymiddle(),
         textAlign = TextAlign.Center,
-        fontFamily = MyFont.workSansRegular,
-        color = Color(0xFF7E22CE),
+        fontFamily = MyFont.jakartaSansExtrabold,
+        color = ElectricBluePallete.BLUE_2,
         fontWeight = FontWeight.ExtraBold,
         modifier = Modifier.fillMaxWidth()
     )
@@ -270,7 +340,7 @@ fun BirthDayTextFieldsArea(
     val uiState by personalInfoVM.personalInfoUiState.collectAsStateWithLifecycle()
     val spacing = LocalSpacing.current
 
-    val lenby3 = (Constants.WIDTH_DP_DEVICE() - (spacing.xl * 2) ) / 3
+    val lenby3 = (Constants.widthDpDevice() - (spacing.xl * 2) ) / 3
 
     Text(
         text = "Ingresa tu fecha de nacimiento",
@@ -421,8 +491,8 @@ fun BirthDayTextFieldsArea(
     val borderColor by animateColorAsState(
         targetValue = when {
             isError   -> Color(0xFFD64545)
-            isFocused -> Color(0xFF7E22CE)
-            else      -> Color(0xFFE9D5FF)
+            isFocused -> ElectricBluePallete.BLUE_2
+            else      -> ElectricBluePallete.BLUE_5.copy(alpha = 0.5f)
         },
         animationSpec = tween(250),
         label = "border_color"
@@ -455,7 +525,7 @@ fun BirthDayTextFieldsArea(
                 fontSize = ResponsiveText.caption(),
                 lineHeight = ResponsiveLineHeight.caption(),
                 fontFamily = MyFont.workSansRegular,
-                color = if (isError) Color(0xFFD64545) else IQuiuboColorPallete.moradoPrimario,
+                color = if (isError) Color(0xFFD64545) else ElectricBluePallete.BLUE_2,
                 fontWeight = if (isFocused) FontWeight.Bold else FontWeight.Normal,
                 modifier = Modifier
                     .background(color = Color(0xFFFFFFFF), RoundedCornerShape(5.dp))
@@ -565,6 +635,131 @@ fun BirthDayTextFieldsArea(
                 lineHeight = ResponsiveLineHeight.caption(),
                 modifier = Modifier.padding(top = 4.dp),
                 fontFamily = MyFont.workSansRegular
+            )
+        }
+    }
+}
+
+
+
+@Composable private fun TypeSexAreaV2(
+    personalInfoVM: PersonalInfoVM
+) {
+
+    val spacing = LocalSpacing.current
+    val shape = RoundedCornerShape(spacing.md)
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(spacing.md),
+        verticalArrangement = Arrangement.spacedBy(spacing.md)
+    ) {
+
+        RowCustomTitle(
+            icon = Icons.Filled.Wc,
+            "Sexo"
+        )
+
+        Text(
+            text = "Selecciona tu sexo biológico",
+            fontFamily = MyFont.workSansRegular,
+            fontSize = ResponsiveText.caption(),
+            lineHeight = ResponsiveLineHeight.caption(),
+            color = Color.Black
+        )
+
+        HorizontalDivider(color = ElectricBluePallete.BLUE_5.copy(alpha = 0.5f))
+
+        ErrorSexArea(personalInfoVM)
+
+        SelectYourSexBoxAreaV2(personalInfoVM)
+    }
+}
+
+
+
+private enum class TypeSex(val sex: String) {
+    Femenino("Femenino"),
+    Masculino("Masculino"),
+    Otro("Otro");
+}
+
+
+
+@Composable private fun SelectYourSexBoxAreaV2(
+    personalInfoVM: PersonalInfoVM
+) {
+
+    val spacing = LocalSpacing.current
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(spacing.xs)
+    ) {
+
+        ItemToSelectSexV2(
+            vm = personalInfoVM,
+            key = TypeSex.Femenino
+        )
+
+        ItemToSelectSexV2(
+            vm = personalInfoVM,
+            key = TypeSex.Masculino
+        )
+
+        ItemToSelectSexV2(
+            vm = personalInfoVM,
+            key = TypeSex.Otro
+        )
+    }
+}
+
+
+
+@Composable private fun ItemToSelectSexV2(
+    vm: PersonalInfoVM,
+    key: TypeSex
+) {
+
+
+    val spacing = LocalSpacing.current
+    val shape = RoundedCornerShape(spacing.sm)
+    val sexSelected by vm.selectedSex.collectAsStateWithLifecycle()
+
+    val defaultColor = when(key) {
+        TypeSex.Femenino -> Color(0xFFFFD6FF)
+        TypeSex.Masculino -> Color(0xFFD6F0FF)
+        else -> Color.LightGray.copy(alpha = 0.5f)
+    }
+
+    val selectedColor = when(key) {
+        TypeSex.Femenino -> Color(0xFFFF5959)
+        TypeSex.Masculino -> ElectricBluePallete.BLUE_3
+        else -> Color.DarkGray
+    }
+
+    val isSelected = key.sex == sexSelected
+
+    val backgroud = if (isSelected) selectedColor else defaultColor
+
+    ButtonRippleColor(Color.Black) {
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = backgroud
+            ),
+            shape = shape,
+            onClick = { vm.setSelectedSex(key.sex) }
+        ) {
+
+            Text(
+                text = key.sex,
+                fontFamily = MyFont.workSansRegular,
+                fontSize = ResponsiveText.caption(),
+                lineHeight = ResponsiveLineHeight.caption(),
+                fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Normal,
+                color = if (isSelected) Color.White else Color.Black
             )
         }
     }
@@ -705,6 +900,603 @@ private fun SelectBoxSexArea(
 
 
 
+@Composable private fun SelectActivityLevelArea(
+    personalInfoVM: PersonalInfoVM
+) {
+
+    val spacing = LocalSpacing.current
+    val shape = RoundedCornerShape(spacing.md)
+
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(spacing.md),
+        verticalArrangement = Arrangement.spacedBy(spacing.md)
+    ) {
+
+        RowCustomTitle(
+            icon = Icons.AutoMirrored.Filled.DirectionsRun,
+            title = "Nivel de actividad"
+        )
+
+        Text(
+            text = "Selecciona tu nivel de actividad",
+            fontFamily = MyFont.workSansRegular,
+            fontSize = ResponsiveText.caption(),
+            lineHeight = ResponsiveLineHeight.caption(),
+            color = Color.Black
+        )
+
+        HorizontalDivider(color = ElectricBluePallete.BLUE_5.copy(alpha = 0.5f))
+
+        ErrorActivityLevelArea(personalInfoVM)
+
+        Box (
+            contentAlignment = Alignment.Center
+        ) {
+
+            HorizontalDivider(color = ElectricBluePallete.BLUE_5.copy(alpha = 0.5f))
+
+            AreaBoxesToSelectActivityLevel(personalInfoVM)
+        }
+    }
+}
+
+
+
+@Composable private fun TitleActivityLevel() {
+
+    val spacing = LocalSpacing.current
+
+    Text(
+        text = "Nivel de actividad",
+        fontFamily = MyFont.workSansRegular,
+        fontSize = ResponsiveText.small(),
+        lineHeight = ResponsiveLineHeight.small(),
+        color = ElectricBluePallete.BLUE_2,
+        fontWeight = FontWeight.Bold
+    )
+}
+
+
+
+@Composable private fun ErrorActivityLevelArea(
+    personalInfoVM: PersonalInfoVM
+) {
+
+    val uiState by personalInfoVM.personalInfoUiState.collectAsStateWithLifecycle()
+    val spacing = LocalSpacing.current
+
+    when (val s = uiState) {
+        is PersonalInfoUiState.ActivityLevelError -> {
+            Text(
+                text = s.message,
+                color = Color(0xFFD64545),
+                fontSize = ResponsiveText.caption(),
+                lineHeight = ResponsiveLineHeight.caption(),
+                fontFamily = MyFont.workSansRegular,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Start
+            )
+        }
+        else -> {}
+    }
+}
+
+
+
+@Composable private fun AreaBoxesToSelectActivityLevel(
+    personalInfoVM: PersonalInfoVM
+) {
+
+    val spacing = LocalSpacing.current
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.spacedBy(spacing.md)
+    ) {
+
+        SeletedBoxActivityLevel(
+            Modifier.weight(1f),
+            personalInfoVM,
+            NeuralNetConfig.ActivityValues.Baja.value
+        )
+
+        SeletedBoxActivityLevel(
+            Modifier.weight(1f),
+            personalInfoVM,
+            NeuralNetConfig.ActivityValues.Media.value
+        )
+
+        SeletedBoxActivityLevel(
+            Modifier.weight(1f),
+            personalInfoVM,
+            NeuralNetConfig.ActivityValues.Alta.value
+        )
+    }
+}
+
+
+
+@Composable private fun SeletedBoxActivityLevel(
+    modifier: Modifier,
+    personalInfoVM: PersonalInfoVM,
+    key: String
+) {
+
+    val spacing = LocalSpacing.current
+    val shape = RoundedCornerShape(spacing.sm)
+
+    val activitySelected by personalInfoVM.activityLevel.collectAsStateWithLifecycle()
+    val isSelected = key == activitySelected
+
+    val color = if (isSelected) ElectricBluePallete.BLUE_3 else Color.White
+    val fontColor = if (isSelected) Color.White else Color.Black
+    val fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+
+    ButtonRippleColor(Color.Black) {
+        Button(
+            modifier = modifier,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = color
+            ),
+            shape = shape,
+            border = BorderStroke(1.dp, ElectricBluePallete.BLUE_3),
+            onClick = { personalInfoVM.setActivityLevel(key) }
+        ) {
+
+            Text(
+                text = key,
+                color = fontColor,
+                fontFamily = MyFont.workSansRegular,
+                fontSize = ResponsiveText.small(),
+                lineHeight = ResponsiveLineHeight.small(),
+                fontWeight = fontWeight
+            )
+        }
+    }
+}
+
+
+
+@Composable private fun SelectFamilyHistoryDiabetes(
+    personalInfoVM: PersonalInfoVM
+) {
+
+    val spacing = LocalSpacing.current
+    val shape = RoundedCornerShape(spacing.md)
+
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(spacing.md),
+        verticalArrangement = Arrangement.spacedBy(spacing.md)
+    ) {
+
+        RowCustomTitle(
+            icon = Icons.Filled.PersonSearch,
+            title = "Antecedente familiar"
+        )
+
+        Text(
+            text = buildAnnotatedString {
+                append("¿En tu familia hubo casos de ")
+                withStyle(
+                    SpanStyle(
+                        color = ElectricBluePallete.BLUE_2,
+                        fontWeight = FontWeight.Bold
+                    )
+                ) { append("Diabetes") }
+                append("?")
+            },
+            fontFamily = MyFont.workSansRegular,
+            fontSize = ResponsiveText.caption(),
+            lineHeight = ResponsiveLineHeight.caption(),
+            color = Color.Black
+        )
+
+        HorizontalDivider(color = ElectricBluePallete.BLUE_5.copy(alpha = 0.5f))
+
+        ErrorFamilyHistoryDiabetesArea(personalInfoVM)
+
+        Box (
+            contentAlignment = Alignment.Center
+        ) {
+
+            HorizontalDivider(color = ElectricBluePallete.BLUE_5.copy(alpha = 0.5f))
+
+            YesNoHistoryDiabetes(personalInfoVM)
+        }
+
+
+    }
+}
+
+
+
+@Composable private fun TitleFamilyHistoryDiabetes() {
+
+    Text(
+        text = "¿En tu familia hubo casos de Diabetes?",
+        fontSize = ResponsiveText.body(),
+        lineHeight = ResponsiveLineHeight.body(),
+        fontFamily = MyFont.workSansRegular,
+        color = Color.White
+    )
+}
+
+
+
+@Composable private fun ErrorFamilyHistoryDiabetesArea(
+    personalInfoVM: PersonalInfoVM
+) {
+
+    val uiState by personalInfoVM.personalInfoUiState.collectAsStateWithLifecycle()
+    val spacing = LocalSpacing.current
+
+    when (val s = uiState) {
+        is PersonalInfoUiState.FamilyHistoryDiabetesError -> {
+            Text(
+                text = s.message,
+                color = Color(0xFFD64545),
+                fontSize = ResponsiveText.caption(),
+                lineHeight = ResponsiveLineHeight.caption(),
+                fontFamily = MyFont.workSansRegular,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Start
+            )
+        }
+        else -> {}
+    }
+}
+
+
+
+@Composable private fun YesNoHistoryDiabetes(personalInfoVM: PersonalInfoVM) {
+
+    val spacing = LocalSpacing.current
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(spacing.md)
+    ) {
+
+        HistoryButton(Modifier.weight(1f), personalInfoVM, NeuralNetConfig.FamilyHistoryValues.No.value)
+
+        HistoryButton(Modifier.weight(1f), personalInfoVM, NeuralNetConfig.FamilyHistoryValues.Yes.value)
+    }
+}
+
+
+
+@Composable private fun HistoryButton(
+    modifier: Modifier,
+    personalInfoVM: PersonalInfoVM,
+    key: String
+) {
+
+    val spacing = LocalSpacing.current
+    val shape = RoundedCornerShape(spacing.sm)
+
+    val familyHistory by personalInfoVM.familyHistoryDiabetes.collectAsStateWithLifecycle()
+    val isSelected = key == familyHistory
+
+    val color = if (isSelected) ElectricBluePallete.BLUE_3 else Color.White
+    val fontColor = if (isSelected) Color.White else Color.Black
+    val fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+
+    ButtonRippleColor(Color.Black) {
+        Button(
+            modifier = modifier,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = color
+            ),
+            border = BorderStroke(1.dp, ElectricBluePallete.BLUE_3),
+            shape = shape,
+            onClick = { personalInfoVM.setFamilyHistoryDiabetes(key) }
+        ) {
+
+            Text(
+                text = key,
+                color = fontColor,
+                fontFamily = MyFont.workSansRegular,
+                fontSize = ResponsiveText.small(),
+                lineHeight = ResponsiveLineHeight.small(),
+                fontWeight = fontWeight
+            )
+        }
+    }
+}
+
+
+
+@Composable private fun SelectHeightCmArea(
+    personalInfoVM: PersonalInfoVM
+) {
+
+    val spacing = LocalSpacing.current
+    val shape = RoundedCornerShape(spacing.md)
+
+    val height by personalInfoVM.heightCm.collectAsStateWithLifecycle()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(spacing.md),
+        verticalArrangement = Arrangement.spacedBy(spacing.md)
+    ) {
+
+        RowCustomTitle(
+            icon = Icons.Filled.Straighten,
+            title = "Ingresa tu altura"
+        )
+
+        Text(
+            text = "${if ((height.toIntOrNull() ?: 0) == 0) 0.0 else height.toFloat() / 100.0} mts",
+            fontSize = ResponsiveText.caption(),
+            lineHeight = ResponsiveLineHeight.caption(),
+            color = ElectricBluePallete.BLUE_2,
+            fontFamily = MyFont.workSansRegular,
+            modifier = Modifier.fillMaxWidth(),
+            fontWeight = FontWeight.Bold
+        )
+
+        ErrorHeightCmArea(personalInfoVM)
+
+        HeightRulerPicker(
+            units = "Cm",
+            modifier = Modifier.fillMaxWidth(),
+            initialValue = 0,
+            onValueChange = { personalInfoVM.setHeightCm(it.toString()) }
+        )
+    }
+}
+
+
+
+@Composable private fun ErrorHeightCmArea(
+    personalInfoVM: PersonalInfoVM
+) {
+
+    val uiState by personalInfoVM.personalInfoUiState.collectAsStateWithLifecycle()
+    val spacing = LocalSpacing.current
+
+    when (val s = uiState) {
+        is PersonalInfoUiState.HeightCmError -> {
+            Text(
+                text = s.message,
+                color = Color(0xFFD64545),
+                fontSize = ResponsiveText.caption(),
+                lineHeight = ResponsiveLineHeight.caption(),
+                fontFamily = MyFont.workSansRegular,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        }
+        else -> {}
+    }
+}
+
+
+
+@SuppressLint("UnusedBoxWithConstraintsScope")
+@Composable
+fun HeightRulerPicker(
+    units: String,
+    modifier: Modifier = Modifier,
+    initialValue: Int = 170,
+    range: IntRange = 0..220,
+    accentColor: Color = Color(0xFFFFD54F),
+    tickColor: Color = Color.Black.copy(alpha = 0.6f),
+    onValueChange: (Int) -> Unit
+) {
+    val itemWidth = 10.dp
+    val itemWidthPx = with(LocalDensity.current) { itemWidth.toPx() }
+    val count = range.last - range.first + 1
+
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = (initialValue - range.first).coerceIn(0, count - 1)
+    )
+    val flingBehavior = rememberSnapFlingBehavior(listState)
+    val haptic = LocalHapticFeedback.current
+
+    // Valor "en vivo" mientras haces scroll
+    val selected by remember {
+        derivedStateOf {
+            val extra = if (listState.firstVisibleItemScrollOffset > itemWidthPx / 2) 1 else 0
+            (listState.firstVisibleItemIndex + extra).coerceIn(0, count - 1) + range.first
+        }
+    }
+
+    LaunchedEffect(listState) {
+        snapshotFlow { selected }.collect { onValueChange(it) }
+    }
+    LaunchedEffect(listState) {
+        snapshotFlow { selected }.drop(1).collect {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        }
+    }
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+
+        // Número grande
+        Row(verticalAlignment = Alignment.Bottom) {
+            Text(
+                text = "$selected",
+                fontSize = 52.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                fontFamily = MyFont.geistMonoNerdFontRegular
+            )
+            Text(
+                text = " $units",
+                fontSize = 24.sp,
+                color = Color.Black.copy(alpha = 0.7f),
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+        }
+
+        Spacer(Modifier.height(16.dp))
+
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+        ) {
+            // Padding lateral para que el primer y último valor puedan llegar al centro
+            val sidePadding = (maxWidth - itemWidth) / 2
+
+            LazyRow(
+                state = listState,
+                flingBehavior = flingBehavior,
+                contentPadding = PaddingValues(horizontal = sidePadding),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // Difumina los bordes izquierdo y derecho
+                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                    .drawWithContent {
+                        drawContent()
+                        drawRect(
+                            brush = Brush.horizontalGradient(
+                                0f to Color.Transparent,
+                                0.2f to Color.Black,
+                                0.8f to Color.Black,
+                                1f to Color.Transparent
+                            ),
+                            blendMode = BlendMode.DstIn
+                        )
+                    }
+            ) {
+                items(count) { index ->
+                    RulerTick(
+                        value = index + range.first,
+                        itemWidth = itemWidth,
+                        tickColor = tickColor
+                    )
+                }
+            }
+
+            // Indicador fijo al centro
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .width(4.dp)
+                    .height(64.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(accentColor)
+            )
+        }
+    }
+}
+
+
+
+@Composable
+private fun RulerTick(
+    value: Int,
+    itemWidth: Dp,
+    tickColor: Color
+) {
+    val tickHeight = when {
+        value % 10 == 0 -> 44.dp
+        value % 5 == 0 -> 32.dp
+        else -> 20.dp
+    }
+
+    Column(
+        modifier = Modifier.width(itemWidth),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Box(
+            modifier = Modifier
+                .width(2.dp)
+                .height(tickHeight)
+                .clip(RoundedCornerShape(1.dp))
+                .background(tickColor)
+        )
+
+        if (value % 10 == 0) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "$value",
+                fontSize = 12.sp,
+                color = tickColor,
+                softWrap = false,
+                // El texto es más ancho que el item, no debe recortarse
+                modifier = Modifier.wrapContentWidth(unbounded = true)
+            )
+        }
+    }
+}
+
+
+
+@Composable private fun SelectWeightKg(
+    personalInfoVM: PersonalInfoVM
+) {
+
+    val spacing = LocalSpacing.current
+    val shape = RoundedCornerShape(spacing.md)
+
+    val height by personalInfoVM.heightCm.collectAsStateWithLifecycle()
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(spacing.md),
+        verticalArrangement = Arrangement.spacedBy(spacing.md)
+    ) {
+
+        RowCustomTitle(
+            icon = Icons.Filled.MonitorWeight,
+            title = "Ingresa tu peso"
+        )
+
+        ErrorWeightKgArea(personalInfoVM)
+
+        HeightRulerPicker(
+            units = "Kg",
+            modifier = Modifier.fillMaxWidth(),
+            initialValue = 0,
+            onValueChange = { personalInfoVM.setWeightKg(it.toString()) }
+        )
+    }
+}
+
+
+
+@Composable private fun ErrorWeightKgArea(
+    personalInfoVM: PersonalInfoVM
+) {
+
+    val uiState by personalInfoVM.personalInfoUiState.collectAsStateWithLifecycle()
+    val spacing = LocalSpacing.current
+
+    when (val s = uiState) {
+        is PersonalInfoUiState.WeightKgError -> {
+            Text(
+                text = s.message,
+                color = Color(0xFFD64545),
+                fontSize = ResponsiveText.caption(),
+                lineHeight = ResponsiveLineHeight.caption(),
+                fontFamily = MyFont.workSansRegular,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        }
+        else -> {}
+    }
+}
+
+
+
 @Composable private fun OnButtonErrorShow(
     personalInfoVM: PersonalInfoVM
 ) {
@@ -770,7 +1562,7 @@ private fun SelectBoxSexArea(
                     .scale(scale),
                 elevation = ButtonDefaults.elevatedButtonElevation(defaultElevation = 8.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = IQuiuboColorPallete.buttonEnabledOne
+                    containerColor = ElectricBluePallete.BLUE_2
                 ),
                 shape = shape,
                 onClick = {

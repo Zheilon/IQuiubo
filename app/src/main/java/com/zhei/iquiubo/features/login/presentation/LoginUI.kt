@@ -118,6 +118,7 @@ import com.zhei.iquiubo.core.common.MyFont
 import com.zhei.iquiubo.core.common.ResponsiveLineHeight
 import com.zhei.iquiubo.core.common.ResponsiveText
 import com.zhei.iquiubo.core.common.locals.LocalSpacing
+import com.zhei.iquiubo.ui.theme.ElectricBluePallete
 import com.zhei.iquiubo.ui.theme.IQuiuboColorPallete
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -171,7 +172,7 @@ import kotlinx.coroutines.launch
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = spacing.lg)
-                .padding(bottom = Constants.DEVICE_BOTTOM_PADDING()),
+                .padding(bottom = Constants.deviceBottomPadding()),
             verticalArrangement = Arrangement.Bottom,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -268,27 +269,19 @@ import kotlinx.coroutines.launch
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        Box(
-            modifier = Modifier
-                .size(spacing.xxl)
-                .background(IQuiuboColorPallete.moradoPrimario, shapePill),
-            contentAlignment = Alignment.Center
-        ) {
 
-            Icon(
-                imageVector = Icons.Default.SettingsAccessibility,
-                contentDescription = null,
-                tint = IQuiuboColorPallete.backgroundLight,
-                modifier = Modifier.size(spacing.xl)
-            )
-        }
+        Image(
+            painter = painterResource(R.drawable.iquiubo_log_v3_no_back),
+            contentDescription = "logo",
+            modifier = Modifier.size(spacing.xxl)
+        )
 
         Spacer(modifier = Modifier.width(spacing.md))
 
         Text(
             text = buildAnnotatedString { append("IQuiubo") },
             color = IQuiuboColorPallete.primaryText,
-            fontFamily = MyFont.workSansRegular,
+            fontFamily = MyFont.jakartaSansExtrabold,
             fontSize = ResponsiveText.displayBig(),
             lineHeight = ResponsiveLineHeight.displayBig(),
             fontWeight = FontWeight.ExtraBold,
@@ -458,10 +451,10 @@ import kotlinx.coroutines.launch
     val shape = RoundedCornerShape(20.dp)
 
     val borderColor = if (logged) Color(0xFFD5FFD4)
-    else IQuiuboColorPallete.moradoPrimario
+    else ElectricBluePallete.BLUE_3
 
     val iconColor = if (logged) Color(0xFF089400)
-    else IQuiuboColorPallete.moradoPrimario
+    else ElectricBluePallete.BLUE_3
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -471,7 +464,6 @@ import kotlinx.coroutines.launch
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "press_scale"
     )
-
 
     GoogleErrorUI(loginVM)
 
@@ -606,7 +598,7 @@ import kotlinx.coroutines.launch
             interactionSource = interactionSource,
             contentPadding = PaddingValues(spacing.sm),
             colors = ButtonDefaults.buttonColors(
-                containerColor = IQuiuboColorPallete.moradoPrimario,
+                containerColor = ElectricBluePallete.BLUE_4,
                 disabledContainerColor = Color(0xFFD5FFD4)
             ),
             elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp),
@@ -986,7 +978,7 @@ fun ModalBottonForCreateUserWithEmail(
                 append("Acepto la ")
                 withStyle(
                     SpanStyle(
-                        color = IQuiuboColorPallete.moradoPrimario,
+                        color = ElectricBluePallete.BLUE_3,
                         fontWeight = FontWeight.SemiBold
                     )
                 ) {
@@ -1013,13 +1005,13 @@ fun ModalBottonForCreateUserWithEmail(
     val toggleState by vm.acceptPolicy
     val shape = RoundedCornerShape(5.dp)
 
-    val backgroundColor = if (toggleState != null) IQuiuboColorPallete.moradoPrimario
+    val backgroundColor = if (toggleState != null) ElectricBluePallete.BLUE_2
     else IQuiuboColorPallete.backgroundLight
 
     Box(
         modifier = Modifier
             .size(spacing.lg)
-            .border(1.dp, color = IQuiuboColorPallete.moradoPrimario, shape)
+            .border(1.dp, color = ElectricBluePallete.BLUE_2, shape)
             .background(backgroundColor, shape)
             .clip(shape)
             .clickable { vm.setCheckBox() },
@@ -1232,7 +1224,7 @@ private val policySections = listOf(
                 Button(
                     modifier = Modifier
                         .size(50.dp)
-                        .offset(x = (-Constants.WIDTH_DP_DEVICE() / 2) + 20.dp, y = (-40).dp),
+                        .offset(x = (-Constants.widthDpDevice() / 2) + 20.dp, y = (-40).dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = IQuiuboColorPallete.moradoPrimario
                     ),
@@ -1357,7 +1349,7 @@ private val policySections = listOf(
             interactionSource = interactionSource,
             contentPadding = PaddingValues(spacing.sm),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF7E22CE),
+                containerColor = ElectricBluePallete.BLUE_2,
                 disabledContainerColor = Color.White.copy(alpha = 0.2f)
             ),
             shape = shape,

@@ -3,6 +3,7 @@ import android.util.Log
 import android.util.Patterns
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.FirebaseNetworkException
@@ -264,6 +265,10 @@ class LoginVM @Inject constructor(
                     birthDay = "",
                     sex = "",
                     createdIn = Instant.now(),
+                    heightCM = 0,
+                    weightKG = 0,
+                    activityLevel = "",
+                    familyHistoryDiabetes = ""
                 )
 
                 _isLoggedWithGoogle.value = true
@@ -313,6 +318,10 @@ class LoginVM @Inject constructor(
                     birthDay = "",
                     sex = "",
                     createdIn = Instant.now(),
+                    heightCM = 0,
+                    weightKG = 0,
+                    activityLevel = "",
+                    familyHistoryDiabetes = ""
                 )
                 _isLoggedWithEmail.value = true
                 updateEmailUiState(EmailUiState.Success)
@@ -384,6 +393,10 @@ class LoginVM @Inject constructor(
                     birthDay = "",
                     sex = "",
                     createdIn = Instant.now(),
+                    heightCM = 0,
+                    weightKG = 0,
+                    activityLevel = "",
+                    familyHistoryDiabetes = ""
                 )
                 _isLoggedWithEmail.value = true
                 updateEmailUiState(EmailUiState.Success)

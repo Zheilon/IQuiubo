@@ -47,8 +47,8 @@ enum class BioMarker(
 
     GLUCOSE_POSTPRANDIAL(
         key = "glucose_postprandial",
-        displayName = "Glucosa Postprandial",
-        compactName = "Glucosa Postprandial",
+        displayName = "Glucosa postprandial",
+        compactName = "Glucosa postprandial",
         unit = "mg/dL",
         icon = Icons.Rounded.WaterDrop
     ),

@@ -5,11 +5,13 @@ import androidx.lifecycle.viewModelScope
 import com.zhei.iquiubo.core.domain.model.User
 import com.zhei.iquiubo.core.domain.usecases.GetCurrentUserUIDUseCase
 import com.zhei.iquiubo.core.domain.usecases.ObserveUserUseCase
+import com.zhei.iquiubo.core.navigation.Scenes
 import com.zhei.iquiubo.features.home.domain.model.LastExam
 import com.zhei.iquiubo.features.home.domain.model.RiskBuild
 import com.zhei.iquiubo.features.home.domain.model.RiskGradient
 import com.zhei.iquiubo.features.home.domain.usecase.CalculateRiskValuesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +20,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalTime
@@ -37,6 +40,8 @@ class HomeVM @Inject constructor(
     private val _riskBuildList = MutableStateFlow<List<RiskBuild>>(emptyList())
     val riskBuildList: StateFlow<List<RiskBuild>> = _riskBuildList.asStateFlow()
 
+    private val _navEvents = Channel<Scenes>(Channel.BUFFERED)
+    val navEvents = _navEvents.receiveAsFlow()
 
     val homeUiState: StateFlow<HomeUiState> = flow {
         val id = userId() ?: throw IllegalStateException("Sin sesion")
@@ -73,6 +78,14 @@ class HomeVM @Inject constructor(
                 val id = _user.value!!.userId
                 _riskBuildList.value = calculateRiskValuesUseCase(id)
             }
+        }
+    }
+
+
+
+    fun navigateTo(scene: Scenes) {
+        viewModelScope.launch {
+            _navEvents.trySend(scene)
         }
     }
 }

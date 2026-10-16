@@ -1,6 +1,14 @@
 package com.zhei.iquiubo.core.navigation
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,7 +24,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
@@ -33,12 +44,26 @@ import com.zhei.iquiubo.core.common.MyFont
 import com.zhei.iquiubo.core.common.ResponsiveLineHeight
 import com.zhei.iquiubo.core.common.ResponsiveText
 import com.zhei.iquiubo.core.common.locals.LocalSpacing
+import com.zhei.iquiubo.ui.theme.ElectricBluePallete
 import com.zhei.iquiubo.ui.theme.IQuiuboColorPallete
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeChild
+import dev.chrisbanes.haze.hazeEffect
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 
+
+//                 Brush.linearGradient(
+//                    colors = listOf(
+//                        Color(0xFF9333EA).copy(alpha = 0.4f),
+//                        Color(0xFF6B21A8)
+//                    )
+//                )
 
 
 @Composable fun MyNavigationBar(
     nav: NavHostController,
+    hazeState: HazeState,
     onPaddingBotton: (Dp) -> Unit
 ) {
 
@@ -62,9 +87,13 @@ import com.zhei.iquiubo.ui.theme.IQuiuboColorPallete
         modifier = Modifier
             .onGloballyPositioned {
                 navBarHeight = with(density) { (it.size.height.toDp()) }
-           }
-            .clip(RoundedCornerShape(spacing.xl)),
-        containerColor = Color(0xFF6B21A8).copy(alpha = 0.8f),
+            }
+            .clip(RoundedCornerShape(30.dp))
+            .hazeEffect(hazeState) { blurRadius = spacing.xs }
+            .background(
+                ElectricBluePallete.BLUE_1.copy(alpha = 0.6f),
+            ),
+        containerColor = Color.Transparent,
     ) {
 
         val currentDestination = nav.currentBackStackEntryAsState().value?.destination
@@ -91,17 +120,41 @@ import com.zhei.iquiubo.ui.theme.IQuiuboColorPallete
                     }
                 },
                 icon = {
+
+                    val iconScale = remember { Animatable(1f) }
+
+                    LaunchedEffect(isSelected) {
+                        if (isSelected) {
+
+                            iconScale.animateTo(
+                                targetValue = 0.90f,
+                                animationSpec = tween(250)
+                            )
+
+                            iconScale.animateTo(
+                                targetValue = 1.01f,
+                                animationSpec = spring(dampingRatio = 0.35f, stiffness = 600f)
+                            )
+
+                            iconScale.animateTo(
+                                targetValue = 1f,
+                                animationSpec = spring(dampingRatio = 0.5f, stiffness = 700f)
+                            )
+                        }
+                    }
+
                     Icon(
                         imageVector = if (isSelected) screen.filledIcon else screen.outlinedIcon,
-                        contentDescription = screen.title
+                        contentDescription = screen.title,
+                        modifier = Modifier.scale(iconScale.value)
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
                     selectedTextColor = Color.White,
                     unselectedTextColor = Color.White,
-                    selectedIconColor = Color.Black,
+                    selectedIconColor = Color.White,
                     unselectedIconColor = Color.White,
-                    indicatorColor = IQuiuboColorPallete.backgroundLight
+                    indicatorColor = ElectricBluePallete.BLUE_1
                 ),
                 label = {
                     Text(
@@ -119,6 +172,7 @@ import com.zhei.iquiubo.ui.theme.IQuiuboColorPallete
             )
         }
     }
+
 
     LaunchedEffect(navBarHeight) { onPaddingBotton(navBarHeight) }
 }

@@ -1,5 +1,5 @@
 package com.zhei.iquiubo.core.domain.repository
-import com.zhei.iquiubo.core.domain.model.ProfileUpdate
+import com.zhei.iquiubo.features.personal_info.domain.models.ProfileUpdate
 import com.zhei.iquiubo.core.domain.model.User
 import kotlinx.coroutines.flow.Flow
 

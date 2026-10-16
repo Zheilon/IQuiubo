@@ -4,7 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
-import com.zhei.iquiubo.core.domain.model.ProfileUpdate
+import com.zhei.iquiubo.features.personal_info.domain.models.ProfileUpdate
 import com.zhei.iquiubo.core.domain.usecases.GetCurrentUserUIDUseCase
 import com.zhei.iquiubo.core.framework.NetworkChecker
 import com.zhei.iquiubo.features.personal_info.domain.usecases.UpdateProfileUseCase
@@ -44,6 +44,18 @@ class PersonalInfoVM @Inject constructor(
 
     private val _selectedSex = MutableStateFlow<String?>(null)
     val selectedSex: StateFlow<String?> = _selectedSex.asStateFlow()
+
+    private val _activityLevel = MutableStateFlow<String?>(null)
+    val activityLevel: StateFlow<String?> = _activityLevel.asStateFlow()
+
+    private val _heightCm = MutableStateFlow("")
+    val heightCm: StateFlow<String> = _heightCm.asStateFlow()
+
+    private val _weightKg = MutableStateFlow("")
+    val weightKg: StateFlow<String> = _weightKg.asStateFlow()
+
+    private val _familyHistoryDiabetes = MutableStateFlow<String?>(null)
+    val familyHistoryDiabetes: StateFlow<String?> = _familyHistoryDiabetes.asStateFlow()
 
     private val _personalInfoUiState = MutableStateFlow<PersonalInfoUiState>(PersonalInfoUiState.Idle)
     val personalInfoUiState: StateFlow<PersonalInfoUiState> = _personalInfoUiState.asStateFlow()
@@ -132,6 +144,42 @@ class PersonalInfoVM @Inject constructor(
 
 
 
+    fun setActivityLevel(activityLevel: String) {
+        _activityLevel.value = activityLevel
+
+        if (_personalInfoUiState.value is PersonalInfoUiState.ActivityLevelError)
+            updatePersonalInfoUiState(PersonalInfoUiState.Idle)
+    }
+
+
+
+    fun setHeightCm(heightCm: String) {
+        _heightCm.value = heightCm
+
+        if (_personalInfoUiState.value is PersonalInfoUiState.HeightCmError)
+            updatePersonalInfoUiState(PersonalInfoUiState.Idle)
+    }
+
+
+
+    fun setWeightKg(weightKg: String) {
+        _weightKg.value = weightKg
+
+        if (_personalInfoUiState.value is PersonalInfoUiState.WeightKgError)
+            updatePersonalInfoUiState(PersonalInfoUiState.Idle)
+    }
+
+
+
+    fun setFamilyHistoryDiabetes(familyHistory: String) {
+        _familyHistoryDiabetes.value = familyHistory
+
+        if (_personalInfoUiState.value is PersonalInfoUiState.FamilyHistoryDiabetesError)
+            updatePersonalInfoUiState(PersonalInfoUiState.Idle)
+    }
+
+
+
     /**
      * Actualiza la variable _personalInfoUiState a
      * el estado que venga del parámetro.
@@ -202,7 +250,8 @@ class PersonalInfoVM @Inject constructor(
         }
 
         val age = Period.between(birthDate, LocalDate.now()).years
-        if (age < 1 || age > 120) { // rango sano
+
+        if (age !in 1..120) { // rango sano
             updatePersonalInfoUiState(
                 PersonalInfoUiState.DateError(
                     "Edad fuera de rango."
@@ -211,12 +260,52 @@ class PersonalInfoVM @Inject constructor(
             return false
         }
 
-
         // Validar si el el user ya marcó la casilla de sexo
         if (_selectedSex.value == null) {
             updatePersonalInfoUiState(
                 PersonalInfoUiState.SexError(
                     "Falta que selecciones tu sexo"
+                )
+            )
+            return false
+        }
+
+        // Validar si el el user ya marcó alguna opción relacionada a si en su
+        // familia hubo casos de diabetes.
+        if (_familyHistoryDiabetes.value == null) {
+            updatePersonalInfoUiState(
+                PersonalInfoUiState.FamilyHistoryDiabetesError(
+                    "Falta que selecciones alguna de las 2 opciones."
+                )
+            )
+            return false
+        }
+
+        // Validación de que el user haya seleccionado el nivel de actividad
+        if (_activityLevel.value == null) {
+            updatePersonalInfoUiState(
+                PersonalInfoUiState.ActivityLevelError(
+                    "Debes seleccionar tu nivel de actividad."
+                )
+            )
+            return false
+        }
+
+        // Validación de que el user haya seleccionado un valor de su altura
+        if ((_heightCm.value.toIntOrNull() ?: 0) == 0) {
+            updatePersonalInfoUiState(
+                PersonalInfoUiState.HeightCmError(
+                    "Debes seleccionar un valor, deslizando la regla."
+                )
+            )
+            return false
+        }
+
+        // Validación de que el user haya seleccionado un valor de su peso
+        if ((_weightKg.value.toIntOrNull() ?: 0) == 0) {
+            updatePersonalInfoUiState(
+                PersonalInfoUiState.WeightKgError(
+                    "Debes seleccionar un valor, deslizando la regla."
                 )
             )
             return false
@@ -261,7 +350,11 @@ class PersonalInfoVM @Inject constructor(
                 firstName = _firstName.value,
                 firstLastName = _firstLastName.value,
                 birthDay = LocalDate.of(y, m, d).toString(),
-                sex = _selectedSex.value ?: "Unspecified"
+                sex = _selectedSex.value ?: "Unspecified",
+                heightCM = _heightCm.value.toInt(),
+                weightKG = _weightKg.value.toInt(),
+                activityLevel = _activityLevel.value,
+                familyHistoryDiabetes = _familyHistoryDiabetes.value
             )
 
             runCatching {

@@ -9,6 +9,7 @@ object MyFont {
     val spaceGroteskRegular = FontFamily(Font(R.font.spacegroteskregular))
     val workSansRegular = FontFamily(Font(R.font.worksansregular))
     val jakartaSansRegular = FontFamily(Font(R.font.plusjakartasansregular))
+    val jakartaSansExtrabold = FontFamily(Font(R.font.jakartasansextrabold))
     val jetbrainsMonoRegular = FontFamily(Font(R.font.jetbrainsmonoregular))
     val ebgaramondregular = FontFamily(Font(R.font.ebgaramondregular))
     val geistMonoNerdFontRegular = FontFamily(Font(R.font.geistmononerdfontmonoregular))

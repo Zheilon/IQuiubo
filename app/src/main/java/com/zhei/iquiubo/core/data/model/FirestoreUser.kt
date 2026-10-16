@@ -19,5 +19,9 @@ data class FirestoreUser(
     val policyAccepted: Boolean = false,
     val birthDay: String = "",
     val sex: String = "",
-    val createdIn: Timestamp = Timestamp.now()
+    val createdIn: Timestamp = Timestamp.now(),
+    val heightCM: Int = 0,
+    val weightKG: Int = 0,
+    val activityLevel: String = "",
+    val familyHistoryDiabetes: String = ""
 )

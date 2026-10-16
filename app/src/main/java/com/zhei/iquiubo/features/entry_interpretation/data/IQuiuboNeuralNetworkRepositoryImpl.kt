@@ -1,6 +1,6 @@
 package com.zhei.iquiubo.features.entry_interpretation.data
 import  android.content.Context
-import com.zhei.iquiubo.features.entry_interpretation.domain.NeuralNetConfig
+import com.zhei.iquiubo.core.domain.model.NeuralNetConfig
 import com.zhei.iquiubo.features.entry_interpretation.domain.repository.IQuiuboNeuralNetworkRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
 import org.tensorflow.lite.Interpreter
@@ -11,6 +11,7 @@ import javax.inject.Inject
 import kotlin.math.ln
 import kotlin.math.pow
 
+
 class IQuiuboNeuralNetworkRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ): IQuiuboNeuralNetworkRepository {
@@ -19,9 +20,11 @@ class IQuiuboNeuralNetworkRepositoryImpl @Inject constructor(
     // Carga y mapea en memoria el .tflite exportado para esta versión del
     // modelo. Al ser un MappedByteBuffer, TFLite lee directamente desde el
     // archivo sin copiarlo completo a heap de la JVM.
-    private val interpreter = Interpreter(
-        loadModelFile(context, "iquiubo_priority_model_version_3.0.5.2_.tflite")
-    )
+    private val interpreter by lazy {
+        Interpreter(
+            loadModelFile(context, "iquiubo_priority_model_version_3.0.5.2_.tflite")
+        )
+    }
 
 
 
@@ -37,7 +40,7 @@ class IQuiuboNeuralNetworkRepositoryImpl @Inject constructor(
      */
     override fun predict(map: Map<String, Double>): FloatArray {
         val input = arrayOf(buildInputVector(map))
-        val output = Array(1) { FloatArray(NeuralNetConfig.CLASSES.size) }
+        val output = Array(1) { FloatArray(NeuralNetConfig.PriorityNetNames.getList().size) }
         interpreter.run(input, output)
         return output[0]
     }

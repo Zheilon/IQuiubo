@@ -5,7 +5,7 @@ import com.google.firebase.firestore.SetOptions
 import com.zhei.iquiubo.core.common.FirestoreCollections
 import com.zhei.iquiubo.core.data.mapper.toCustomMap
 import com.zhei.iquiubo.core.data.model.FirestoreUser
-import com.zhei.iquiubo.core.domain.model.ProfileUpdate
+import com.zhei.iquiubo.features.personal_info.domain.models.ProfileUpdate
 import com.zhei.iquiubo.core.domain.model.User
 import com.zhei.iquiubo.core.domain.repository.UserRepository
 import com.zhei.iquiubo.core.mappers.toDataFirestoreUser
@@ -72,6 +72,10 @@ class UserRepositoryImpl @Inject constructor(
             .set(map, SetOptions.merge())
             .await()
     }
+
+
+
+
 
 
 

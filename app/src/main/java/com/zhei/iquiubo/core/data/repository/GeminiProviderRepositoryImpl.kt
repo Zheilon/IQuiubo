@@ -14,24 +14,22 @@ class GeminiProviderRepositoryImpl @Inject constructor(
 ): AIProviderRepository {
 
 
-    override suspend fun interpret(content: String): String {
+    override suspend fun interpret(content: String): String? {
         return withContext(Dispatchers.IO) {
             runCatching {
-                val response = functions
+                functions
                     .getHttpsCallable("askGemini")
                     .call(
                         mapOf(
                             "model" to "gemini-2.0-flash",
                             "prompt" to content
                         )
-                    ).await()
-
-                response.getData().toString()
+                    ).await().getData().toString()
 
             }.onFailure {
-                Log.e("AUTH_TESTING", "Error en askGemini", it)
+                Log.e("AUTH_TESTING_GEMINI_PROVIDER", "Error en askGemini", it)
 
-            }.getOrNull() ?: "No hubo respuesta"
+            }.getOrNull()
         }
     }
 }

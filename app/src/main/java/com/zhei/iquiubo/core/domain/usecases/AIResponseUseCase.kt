@@ -11,6 +11,6 @@ class AIResponseUseCase @Inject constructor(
      * una lista de un tipo de clase la cual me ayudará
      * para darle más forma a las respuestas
      * */
-    suspend operator fun invoke(content: String): String =
+    suspend operator fun invoke(content: String): String? =
         repo.interpret(content)
 }

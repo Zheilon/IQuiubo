@@ -1,5 +1,5 @@
 package com.zhei.iquiubo.features.personal_info.domain.usecases
-import com.zhei.iquiubo.core.domain.model.ProfileUpdate
+import com.zhei.iquiubo.features.personal_info.domain.models.ProfileUpdate
 import com.zhei.iquiubo.core.domain.repository.UserRepository
 import javax.inject.Inject
 
